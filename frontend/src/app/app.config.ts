@@ -4,7 +4,6 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { firstValueFrom } from 'rxjs';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
@@ -17,8 +16,10 @@ import { AuthService } from './core/auth/auth.service';
  * (das Access-Token liegt nur im Speicher und geht bei Reload verloren).
  * Fehler werden bewusst ignoriert – dann bleibt der Nutzer anonym.
  */
-function restoreSessionInitializer(auth: AuthService): () => Promise<unknown> {
-  return () => firstValueFrom(auth.refresh()).catch(() => false);
+function restoreSessionInitializer(auth: AuthService): () => void {
+  return () => {
+    auth.refresh().subscribe();
+  };
 }
 
 export const appConfig: ApplicationConfig = {

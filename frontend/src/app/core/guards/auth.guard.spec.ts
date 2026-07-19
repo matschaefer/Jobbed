@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { of } from 'rxjs';
 import { authGuard } from './auth.guard';
+import { AuthService } from '../auth/auth.service';
 import { AuthStore } from '../auth/auth.store';
 
 describe('authGuard', () => {
@@ -16,7 +18,15 @@ describe('authGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RouterModule.forRoot([])],
-      providers: [AuthStore],
+      providers: [
+        AuthStore,
+        {
+          provide: AuthService,
+          useValue: {
+            refresh: () => of(false),
+          },
+        },
+      ],
     });
     store = TestBed.inject(AuthStore);
   });
@@ -39,6 +49,7 @@ describe('authGuard', () => {
   });
 
   it('redirects to /login when not authenticated', () => {
+    store.clear();
     const result = runGuard();
     expect(result instanceof UrlTree).toBeTrue();
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toContain('/login');
