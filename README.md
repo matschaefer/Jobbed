@@ -2,7 +2,7 @@
 
 A fullstack job application tracker built with Angular and Spring Boot.
 
-[Live Demo](DEPLOYMENT_URL) · [Source Code](https://github.com/matschaefer/Jobbed)
+[Live Demo](https://jobbed-app.vercel.app/) · [Source Code](https://github.com/matschaefer/Jobbed)
 
 ## Overview
 
@@ -25,7 +25,7 @@ allowed, while data-changing requests such as create, update, delete, file
 upload and AI requests are blocked for the demo user. Login, refresh and logout
 remain available so the demo session can work normally.
 
-- Live demo: [DEPLOYMENT_URL](DEPLOYMENT_URL)
+- Live demo: [DEPLOYMENT_URL](https://jobbed-app.vercel.app/))
 - Demo entry: use the **Demo live ansehen** button on the landing page or the
   demo button on the login page.
 
