@@ -1,0 +1,22 @@
+# ============================================================================
+# Profil: test – Integrationstests (Datasource via Testcontainers/@ServiceConnection)
+# ============================================================================
+spring:
+  jpa:
+    show-sql: false
+  flyway:
+    enabled: true
+
+app:
+  auth:
+    jwt-secret: test-only-jwt-secret-value-1234567890-abcdefghij
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.jobbed: DEBUG

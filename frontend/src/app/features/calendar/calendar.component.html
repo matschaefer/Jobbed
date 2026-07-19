@@ -1,0 +1,119 @@
+<section class="space-y-5">
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Planung</p>
+      <h1 class="m-0 text-2xl font-bold md:text-3xl">Interviews & Erinnerungen</h1>
+      <p class="mt-1 text-sm text-muted">Alle Termine, Follow-ups und Deadlines an einem Ort.</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn-ghost" (click)="newReminder()"><span class="material-icons-round text-[18px]">alarm_add</span>Erinnerung</button>
+      <button class="btn-primary" (click)="newInterview()"><span class="material-icons-round text-[18px]">add</span>Interview planen</button>
+    </div>
+  </header>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+  @if (loadError()) {
+    <div class="flex items-center justify-between gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200" role="alert">
+      <span>Der Kalender konnte nicht geladen werden. Bitte prüfe die Verbindung.</span>
+      <button class="btn-ghost !py-1.5" (click)="retry()">Erneut laden</button>
+    </div>
+  }
+
+  <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_310px]">
+    <div class="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+      <div class="flex items-center justify-between border-b border-border px-4 py-3">
+        <div class="flex items-center gap-1">
+          <button class="grid h-9 w-9 place-items-center rounded-lg hover:bg-surface-2" aria-label="Vorheriger Monat" (click)="previousMonth()"><span class="material-icons-round">chevron_left</span></button>
+          <button class="grid h-9 w-9 place-items-center rounded-lg hover:bg-surface-2" aria-label="Nächster Monat" (click)="nextMonth()"><span class="material-icons-round">chevron_right</span></button>
+          <button class="btn-ghost ml-2 !px-3 !py-1.5" (click)="today()">Heute</button>
+        </div>
+        <h2 class="m-0 text-lg font-semibold capitalize">{{ monthTitle() }}</h2>
+        <span class="text-xs text-muted">{{ interviews().length }} Termine</span>
+      </div>
+      <div class="calendar-grid grid border-b border-border bg-surface-2/50 text-center text-[11px] font-semibold uppercase tracking-wider text-muted">
+        @for (name of ['Mo','Di','Mi','Do','Fr','Sa','So']; track name) { <div class="py-2">{{ name }}</div> }
+      </div>
+      <div class="calendar-grid grid">
+        @for (day of days(); track day.key) {
+          <div class="calendar-day group border-b border-r border-border p-2" [class.opacity-40]="!day.inMonth">
+            <div class="mb-2 flex items-center justify-between">
+              <span class="grid h-7 w-7 place-items-center rounded-full text-xs" [class.bg-brand]="day.today" [class.font-bold]="day.today" [class.text-brand-fg]="day.today">{{ day.date | date:'d' }}</span>
+              <button class="grid h-7 w-7 place-items-center rounded-lg text-muted opacity-100 hover:bg-surface-2 hover:text-text-hi focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100" [attr.aria-label]="'Interview am ' + day.key + ' planen'" (click)="newInterview(day.date)"><span class="material-icons-round text-[17px]">add</span></button>
+            </div>
+            <div class="space-y-1">
+              @for (item of interviewsFor(day.key); track item.id) {
+                <button class="w-full rounded-md border-l-2 border-brand bg-brand-soft px-2 py-1.5 text-left transition hover:bg-brand/20" (click)="edit(item)">
+                  <span class="block truncate text-[11px] font-semibold">{{ item.startDateTime | date:'HH:mm' }} · {{ item.title }}</span>
+                  <span class="block truncate text-[10px] text-muted">{{ item.companyName }}</span>
+                </button>
+              }
+              @for (reminder of remindersFor(day.key); track reminder.id) {
+                <button class="w-full rounded-md border-l-2 border-amber-400 bg-amber-400/10 px-2 py-1 text-left transition hover:bg-amber-400/20" [attr.aria-label]="reminder.title + ' als erledigt markieren'" (click)="complete(reminder)">
+                  <span class="block truncate text-[10px] font-semibold text-amber-200">{{ reminder.reminderDateTime | date:'HH:mm' }} · {{ reminder.title }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <aside class="space-y-4">
+      <div class="rounded-2xl border border-border bg-surface p-4">
+        <div class="mb-3 flex items-center justify-between"><h2 class="m-0 text-base font-semibold">Als Nächstes</h2><span class="material-icons-round text-brand">event</span></div>
+        <div class="space-y-2">
+          @for (item of upcoming(); track item.id) {
+            <button class="w-full rounded-xl border border-border bg-surface-2 p-3 text-left hover:border-border-light" (click)="edit(item)">
+              <div class="mb-2 flex items-center justify-between"><span class="chip !bg-brand-soft !text-brand">{{ typeLabel(item.interviewType) }}</span><span class="text-xs text-muted">{{ item.startDateTime | date:'dd.MM.' }}</span></div>
+              <p class="m-0 truncate text-sm font-semibold">{{ item.title }}</p><p class="m-0 mt-1 truncate text-xs text-muted">{{ item.companyName }} · {{ item.startDateTime | date:'HH:mm' }}</p>
+            </button>
+          } @empty { <p class="py-6 text-center text-sm text-muted">Keine anstehenden Interviews.</p> }
+        </div>
+      </div>
+      <div class="rounded-2xl border border-border bg-surface p-4">
+        <div class="mb-3 flex items-center justify-between"><h2 class="m-0 text-base font-semibold">Offene Erinnerungen</h2><span class="text-xs text-muted">{{ reminders().length }}</span></div>
+        <div class="space-y-2">
+          @for (reminder of reminders().slice(0, 7); track reminder.id) {
+            <div class="flex gap-3 rounded-xl bg-surface-2 p-3">
+              <button class="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-border-light text-muted hover:border-brand hover:text-brand" aria-label="Als erledigt markieren" (click)="complete(reminder)"><span class="material-icons-round text-[16px]">check</span></button>
+              <div class="min-w-0"><p class="m-0 truncate text-sm font-medium">{{ reminder.title }}</p><p class="m-0 mt-1 text-xs text-muted">{{ reminder.reminderDateTime | date:'dd.MM., HH:mm' }} · {{ reminder.sent ? 'versendet' : 'offen' }}</p></div>
+            </div>
+          } @empty { <p class="py-5 text-center text-sm text-muted">Alles erledigt.</p> }
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+@if (editorOpen()) {
+  <button type="button" class="fixed inset-0 z-40 cursor-default bg-black/60 backdrop-blur-sm" aria-label="Interview-Editor schließen" (click)="editorOpen.set(false)"></button>
+  <aside class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto border-l border-border bg-surface p-6 shadow-panel sm:w-[560px]">
+    <div class="mb-6 flex items-start justify-between"><div><p class="mb-1 text-xs font-semibold uppercase tracking-widest text-brand">{{ editing() ? 'Bearbeiten' : 'Neuer Termin' }}</p><h2 class="m-0 text-2xl font-bold">{{ editing()?.title || 'Interview planen' }}</h2></div><button class="grid h-9 w-9 place-items-center rounded-lg hover:bg-surface-2" aria-label="Schließen" (click)="editorOpen.set(false)"><span class="material-icons-round">close</span></button></div>
+    <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+      <label class="block text-xs font-medium text-muted">Bewerbung<select class="input mt-1" formControlName="applicationId"><option value="">Bitte wählen</option>@for (app of applications(); track app.id) { <option [value]="app.id">{{ app.jobTitle }} · {{ app.company.name }}</option> }</select></label>
+      <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-medium text-muted">Typ<select class="input mt-1" formControlName="interviewType">@for (type of interviewTypes; track type.value) { <option [value]="type.value">{{ type.label }}</option> }</select></label><label class="block text-xs font-medium text-muted">Ergebnis<select class="input mt-1" formControlName="result">@for (result of results; track result.value) { <option [value]="result.value">{{ result.label }}</option> }</select></label></div>
+      <label class="block text-xs font-medium text-muted">Titel<input class="input mt-1" formControlName="title" placeholder="z. B. Technisches Gespräch" /></label>
+      <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-medium text-muted">Beginn<input class="input mt-1" type="datetime-local" formControlName="startLocal" /></label><label class="block text-xs font-medium text-muted">Ende<input class="input mt-1" type="datetime-local" formControlName="endLocal" /></label></div>
+      <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-medium text-muted">Ort<input class="input mt-1" formControlName="location" placeholder="Büro oder Ort" /></label><label class="block text-xs font-medium text-muted">Meeting-Link<input class="input mt-1" type="url" formControlName="meetingUrl" placeholder="https://…" /></label></div>
+      <label class="block text-xs font-medium text-muted">Gesprächspartner<input class="input mt-1" formControlName="interviewerNames" placeholder="Namen, kommagetrennt" /></label>
+      <label class="block text-xs font-medium text-muted">Notizen<textarea class="input mt-1 min-h-24 resize-y" formControlName="notes"></textarea></label>
+      <div class="rounded-xl border border-border bg-surface-2 p-4"><mat-checkbox formControlName="reminderEnabled">Vorher erinnern</mat-checkbox>@if (form.controls.reminderEnabled.value) { <label class="mt-3 block text-xs text-muted">Minuten vorher<input class="input mt-1" type="number" min="0" formControlName="reminderMinutesBefore" /></label> }</div>
+      <input type="hidden" formControlName="timeZone" />
+      <div class="flex items-center justify-between border-t border-border pt-5"><div>@if (editing()) { <button type="button" class="text-sm font-medium text-red-400 hover:text-red-300" (click)="remove()">Löschen</button> }</div><div class="flex gap-2"><button type="button" class="btn-ghost" (click)="editorOpen.set(false)">Abbrechen</button><button type="submit" class="btn-primary">Speichern</button></div></div>
+    </form>
+  </aside>
+}
+
+@if (reminderOpen()) {
+  <button type="button" class="fixed inset-0 z-40 cursor-default bg-black/60 backdrop-blur-sm" aria-label="Erinnerungs-Editor schließen" (click)="reminderOpen.set(false)"></button>
+  <aside class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto border-l border-border bg-surface p-6 shadow-panel sm:w-[480px]">
+    <div class="mb-6 flex justify-between"><div><p class="mb-1 text-xs font-semibold uppercase tracking-widest text-brand">Follow-up</p><h2 class="m-0 text-2xl font-bold">Erinnerung anlegen</h2></div><button class="grid h-9 w-9 place-items-center rounded-lg hover:bg-surface-2" (click)="reminderOpen.set(false)"><span class="material-icons-round">close</span></button></div>
+    <form [formGroup]="reminderForm" (ngSubmit)="saveReminder()" class="space-y-4">
+      <label class="block text-xs font-medium text-muted">Bewerbung (optional)<select class="input mt-1" formControlName="applicationId"><option value="">Ohne Bewerbung</option>@for (app of applications(); track app.id) { <option [value]="app.id">{{ app.jobTitle }} · {{ app.company.name }}</option> }</select></label>
+      <label class="block text-xs font-medium text-muted">Titel<input class="input mt-1" formControlName="title" placeholder="z. B. Bei Recruiter nachfassen" /></label>
+      <label class="block text-xs font-medium text-muted">Zeitpunkt<input class="input mt-1" type="datetime-local" formControlName="reminderLocal" /></label>
+      <label class="block text-xs font-medium text-muted">Beschreibung<textarea class="input mt-1 min-h-28" formControlName="description"></textarea></label>
+      <div class="flex justify-end gap-2 border-t border-border pt-5"><button type="button" class="btn-ghost" (click)="reminderOpen.set(false)">Abbrechen</button><button type="submit" class="btn-primary">Erinnerung speichern</button></div>
+    </form>
+  </aside>
+}

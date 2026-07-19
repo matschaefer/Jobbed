@@ -1,0 +1,200 @@
+<header class="page-head">
+  <div>
+    <h1>{{ isEdit() ? 'Bewerbung bearbeiten' : 'Neue Bewerbung' }}</h1>
+    <p class="muted">Erfasse die Details zu dieser Stelle.</p>
+  </div>
+</header>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="card-surface form">
+  <section class="form__grid">
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Unternehmen</mat-label>
+      <input
+        matInput
+        [formControl]="companySearch"
+        [matAutocomplete]="companyAuto"
+        placeholder="Unternehmen suchen …"
+        required
+      />
+      <mat-autocomplete
+        #companyAuto="matAutocomplete"
+        [displayWith]="displayCompany"
+        (optionSelected)="onCompanySelected($event)"
+      >
+        @for (company of companyOptions(); track company.id) {
+          <mat-option [value]="company">{{ company.name }}</mat-option>
+        }
+      </mat-autocomplete>
+      @if (form.controls.companyId.invalid && form.controls.companyId.touched) {
+        <mat-error>Bitte ein Unternehmen wählen.</mat-error>
+      }
+      <mat-hint>
+        Kein Treffer? <a routerLink="/app/companies/new" class="link">Unternehmen anlegen</a>
+      </mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Ansprechpartner</mat-label>
+      <mat-select formControlName="contactPersonId">
+        <mat-option [value]="null">– keiner –</mat-option>
+        @for (contact of contacts(); track contact.id) {
+          <mat-option [value]="contact.id"
+            >{{ contact.firstName }} {{ contact.lastName }}</mat-option
+          >
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Stellenbezeichnung</mat-label>
+      <input matInput formControlName="jobTitle" required />
+      @if (form.controls.jobTitle.invalid && form.controls.jobTitle.touched) {
+        <mat-error>Die Stellenbezeichnung darf nicht leer sein.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="currentStatus">
+        @for (opt of statusOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Priorität</mat-label>
+      <mat-select formControlName="priority">
+        @for (opt of priorityOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Arbeitsmodell</mat-label>
+      <mat-select formControlName="workModel">
+        <mat-option [value]="null">– keins –</mat-option>
+        @for (opt of workModelOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Beschäftigungsart</mat-label>
+      <mat-select formControlName="employmentType">
+        <mat-option [value]="null">– keine –</mat-option>
+        @for (opt of employmentTypeOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Standort</mat-label>
+      <input matInput formControlName="location" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Quelle</mat-label>
+      <input matInput formControlName="source" placeholder="z. B. LinkedIn" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Stellen-URL</mat-label>
+      <input matInput formControlName="jobUrl" type="url" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Gehalt von</mat-label>
+      <input matInput type="number" formControlName="salaryMin" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Gehalt bis</mat-label>
+      <input matInput type="number" formControlName="salaryMax" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Währung</mat-label>
+      <input matInput formControlName="currency" maxlength="3" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Bewertung (1–5)</mat-label>
+      <mat-select formControlName="rating">
+        <mat-option [value]="null">– keine –</mat-option>
+        @for (n of [1, 2, 3, 4, 5]; track n) {
+          <mat-option [value]="n">{{ n }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Bewerbungsdatum</mat-label>
+      <input matInput [matDatepicker]="dp1" formControlName="applicationDate" />
+      <mat-datepicker-toggle matSuffix [for]="dp1" />
+      <mat-datepicker #dp1 />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Frist</mat-label>
+      <input matInput [matDatepicker]="dp2" formControlName="deadline" />
+      <mat-datepicker-toggle matSuffix [for]="dp2" />
+      <mat-datepicker #dp2 />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nächste Aktion</mat-label>
+      <input matInput [matDatepicker]="dp3" formControlName="nextActionDate" />
+      <mat-datepicker-toggle matSuffix [for]="dp3" />
+      <mat-datepicker #dp3 />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Tags</mat-label>
+      <mat-select formControlName="tagIds" multiple>
+        @for (tag of allTags(); track tag.id) {
+          <mat-option [value]="tag.id">{{ tag.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="new-tag span-2">
+      <mat-form-field appearance="outline" class="new-tag__field">
+        <mat-label>Neuen Tag anlegen</mat-label>
+        <input
+          matInput
+          [formControl]="newTagName"
+          (keydown.enter)="$event.preventDefault(); addTag()"
+        />
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="addTag()">
+        <mat-icon>add</mat-icon>
+        Tag
+      </button>
+    </div>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Stellenbeschreibung</mat-label>
+      <textarea matInput formControlName="jobDescription" rows="4"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Notizen</mat-label>
+      <textarea matInput formControlName="notes" rows="3"></textarea>
+    </mat-form-field>
+  </section>
+
+  <div class="form__actions">
+    <a mat-stroked-button routerLink="/app/applications">Abbrechen</a>
+    <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+      {{ isEdit() ? 'Änderungen speichern' : 'Bewerbung anlegen' }}
+    </button>
+  </div>
+</form>

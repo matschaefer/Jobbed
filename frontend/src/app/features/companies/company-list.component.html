@@ -1,0 +1,12 @@
+<header class="page-head"><div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Netzwerk</p><h1>Unternehmen</h1><p class="muted">Firmen, Rollen und Standorte übersichtlich verwalten.</p></div><a class="btn-primary" routerLink="/app/companies/new"><span class="material-icons-round text-[18px]">add</span>Neues Unternehmen</a></header>
+<div class="relative mb-5 max-w-lg"><span class="material-icons-round pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-muted">search</span><input class="input !pl-9" [formControl]="search" placeholder="Unternehmen suchen …" /></div>
+@if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+@if (page(); as p) {
+  @if (p.content.length === 0) { <div class="empty"><span class="material-icons-round text-4xl text-brand">business</span><div><p class="m-0 font-medium text-text-hi">Keine Unternehmen gefunden</p><p class="m-0 mt-1 text-sm">Lege ein Unternehmen für deine Bewerbungen an.</p></div><a class="btn-ghost" routerLink="/app/companies/new">Unternehmen anlegen</a></div> }
+  @else { <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">@for (company of p.content; track company.id) {
+    <article class="group rounded-2xl border border-border bg-surface p-5 transition hover:-translate-y-0.5 hover:border-border-light">
+      <div class="flex items-start gap-3"><app-company-avatar [name]="company.name" [size]="46" /><div class="min-w-0 flex-1"><h2 class="m-0 truncate text-base font-semibold">{{ company.name }}</h2><p class="m-0 mt-1 truncate text-xs text-muted">{{ company.industry || 'Keine Branche' }}@if (company.location) { · {{ company.location }} }</p></div><span class="material-icons-round text-muted">business</span></div>
+      <div class="mt-5 flex gap-2 border-t border-border pt-3"><a class="btn-ghost !px-3 !py-1.5" [routerLink]="['/app/companies', company.id, 'edit']">Bearbeiten</a><button class="rounded-lg px-3 py-1.5 text-sm text-muted hover:bg-red-500/10 hover:text-red-400" (click)="remove(company)">Löschen</button></div>
+    </article>
+  }</div><mat-paginator class="mt-3 !bg-transparent" [length]="p.totalElements" [pageSize]="p.size" [pageIndex]="p.page" [pageSizeOptions]="[12,24,48]" (page)="onPage($event)" /> }
+}

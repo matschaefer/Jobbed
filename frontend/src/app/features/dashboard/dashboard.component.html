@@ -1,0 +1,178 @@
+<header class="mb-6">
+  <p class="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Übersicht</p>
+  <h1 class="m-0 text-2xl font-bold tracking-tight md:text-3xl">
+    Willkommen zurück, {{ store.user()?.firstName }}! <span class="align-middle">👋</span>
+  </h1>
+  <p class="m-0 mt-1 text-sm text-muted">Deine Bewerbungen und Kennzahlen auf einen Blick.</p>
+</header>
+
+@if (loading()) {
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+      <div class="h-24 animate-pulse rounded-xl border border-border bg-surface"></div>
+    }
+  </div>
+} @else if (!hasData()) {
+  <div class="card-surface flex flex-col items-center gap-3 py-16 text-center">
+    <span class="material-icons-round text-4xl text-muted">insights</span>
+    <h2 class="m-0 text-lg font-semibold">Noch keine Daten</h2>
+    <p class="m-0 max-w-sm text-sm text-muted">
+      Sobald du Bewerbungen erfasst, erscheinen hier Kennzahlen, Diagramme und Auswertungen.
+    </p>
+    <a routerLink="/app/applications/new" class="btn-primary mt-2">Erste Bewerbung anlegen</a>
+  </div>
+} @else {
+  <!-- KPI-Karten -->
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    @for (kpi of kpis(); track kpi.label) {
+      <div class="card-surface !p-4">
+        <span
+          class="flex h-9 w-9 items-center justify-center rounded-lg"
+          [class]="kpi.accent ? 'bg-emerald-500/20 text-emerald-400' : 'bg-brand-soft text-brand'"
+        >
+          <span class="material-icons-round text-[20px]">{{ kpi.icon }}</span>
+        </span>
+        <p class="m-0 mt-3 text-2xl font-bold tracking-tight">{{ kpi.value }}</p>
+        <p class="m-0 mt-0.5 text-xs text-muted">{{ kpi.label }}</p>
+      </div>
+    }
+  </div>
+
+  <!-- Diagramme -->
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="card-surface">
+      <h2 class="m-0 mb-4 text-base font-semibold">Statusverteilung</h2>
+      <div class="h-64">
+        <canvas baseChart type="doughnut" [data]="statusChart()" [options]="doughnutOptions"></canvas>
+      </div>
+    </div>
+
+    <div class="card-surface">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="m-0 text-base font-semibold">Bewerbungen im Zeitverlauf</h2>
+        <div class="flex rounded-lg border border-border p-0.5 text-xs">
+          <button
+            class="rounded-md px-2.5 py-1"
+            [class.bg-brand]="granularity() === 'month'"
+            [class.text-brand-fg]="granularity() === 'month'"
+            [class.text-muted]="granularity() !== 'month'"
+            (click)="setGranularity('month')"
+          >
+            Monat
+          </button>
+          <button
+            class="rounded-md px-2.5 py-1"
+            [class.bg-brand]="granularity() === 'week'"
+            [class.text-brand-fg]="granularity() === 'week'"
+            [class.text-muted]="granularity() !== 'week'"
+            (click)="setGranularity('week')"
+          >
+            Woche
+          </button>
+        </div>
+      </div>
+      <div class="h-64">
+        <canvas baseChart type="bar" [data]="timeChart()" [options]="barOptions"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trichter + Quoten -->
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="card-surface">
+      <h2 class="m-0 mb-4 text-base font-semibold">Bewerbungstrichter</h2>
+      <div class="h-56">
+        <canvas baseChart type="bar" [data]="funnelChart()" [options]="funnelOptions"></canvas>
+      </div>
+    </div>
+
+    <div class="card-surface">
+      <h2 class="m-0 mb-4 text-base font-semibold">Quoten</h2>
+      @if (rates(); as r) {
+        <div class="space-y-4">
+          @for (
+            row of [
+              { label: 'Rücklaufquote', value: r.responseRate },
+              { label: 'Interviewquote', value: r.interviewRate },
+              { label: 'Angebotsquote', value: r.offerRate },
+              { label: 'Erfolgsquote', value: r.successRate },
+            ];
+            track row.label
+          ) {
+            <div>
+              <div class="mb-1 flex items-center justify-between text-sm">
+                <span class="text-muted">{{ row.label }}</span>
+                <span class="font-semibold">{{ row.value | percent: '1.0-0' }}</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-surface-3">
+                <div class="h-full rounded-full bg-brand" [style.width.%]="row.value * 100"></div>
+              </div>
+            </div>
+          }
+          <p class="m-0 pt-1 text-xs text-muted">
+            Basis: {{ r.applied | number }} eingereichte Bewerbungen.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Performance-Tabellen -->
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="card-surface">
+      <h2 class="m-0 mb-4 text-base font-semibold">Erfolgreichste Quellen</h2>
+      @if (sources().length) {
+        <table class="w-full text-sm">
+          <thead class="text-xs text-muted">
+            <tr class="border-b border-border">
+              <th class="pb-2 text-left font-medium">Quelle</th>
+              <th class="pb-2 text-right font-medium">Gesamt</th>
+              <th class="pb-2 text-right font-medium">Interviews</th>
+              <th class="pb-2 text-right font-medium">Angebote</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of sources(); track s.source) {
+              <tr class="border-b border-border/60 last:border-0">
+                <td class="py-2">{{ s.source }}</td>
+                <td class="py-2 text-right">{{ s.total }}</td>
+                <td class="py-2 text-right text-muted">{{ s.interviews }}</td>
+                <td class="py-2 text-right font-medium text-brand">{{ s.offers }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="m-0 text-sm text-muted">Keine Quellen erfasst.</p>
+      }
+    </div>
+
+    <div class="card-surface">
+      <h2 class="m-0 mb-4 text-base font-semibold">Häufigste Unternehmen</h2>
+      @if (companies().length) {
+        <table class="w-full text-sm">
+          <thead class="text-xs text-muted">
+            <tr class="border-b border-border">
+              <th class="pb-2 text-left font-medium">Unternehmen</th>
+              <th class="pb-2 text-right font-medium">Gesamt</th>
+              <th class="pb-2 text-right font-medium">Interviews</th>
+              <th class="pb-2 text-right font-medium">Angebote</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of companies(); track c.company) {
+              <tr class="border-b border-border/60 last:border-0">
+                <td class="py-2">{{ c.company }}</td>
+                <td class="py-2 text-right">{{ c.total }}</td>
+                <td class="py-2 text-right text-muted">{{ c.interviews }}</td>
+                <td class="py-2 text-right font-medium text-brand">{{ c.offers }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="m-0 text-sm text-muted">Keine Unternehmen erfasst.</p>
+      }
+    </div>
+  </div>
+}

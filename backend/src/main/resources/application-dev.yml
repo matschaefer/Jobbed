@@ -1,0 +1,36 @@
+# ============================================================================
+# Profil: dev – lokale Entwicklung
+# ============================================================================
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+app:
+  demo-data:
+    enabled: ${DEMO_DATA_ENABLED:true}
+  auth:
+    # Nur für lokale Entwicklung – niemals in Produktion verwenden.
+    jwt-secret: ${JWT_SECRET:dev-only-insecure-jwt-secret-change-me-1234567890}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.jobbed: DEBUG
+    org.hibernate.SQL: DEBUG

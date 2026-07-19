@@ -1,0 +1,57 @@
+<header class="no-print mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Bewerbungswerkstatt</p>
+    <h1 class="m-0 text-2xl font-bold tracking-tight md:text-3xl">Lebenslauf erstellen</h1>
+    <p class="m-0 mt-1 text-sm text-muted">Aus deinen Fakten entsteht ein klarer, ATS-freundlicher Entwurf – optional auf eine Stelle zugeschnitten.</p>
+  </div>
+  <span class="rounded-full border px-3 py-1.5 text-xs" [class.border-brand]="aiStatus().available" [class.text-brand]="aiStatus().available" [class.border-border]="!aiStatus().available" [class.text-muted]="!aiStatus().available">
+    {{ aiStatus().available ? 'KI aktiv · ' + aiStatus().model : 'Vorlagenmodus · KI konfigurierbar' }}
+  </span>
+</header>
+
+<div class="resume-layout grid gap-6 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]">
+  <form class="no-print card-surface h-fit space-y-5" [formGroup]="form" (ngSubmit)="generate()">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="field">Name<input class="input" formControlName="fullName" /></label>
+      <label class="field">E-Mail<input class="input" type="email" formControlName="email" /></label>
+      <label class="field">Telefon<input class="input" formControlName="phone" /></label>
+      <label class="field">Ort<input class="input" formControlName="location" /></label>
+    </div>
+    <label class="field">Gewünschte Überschrift<input class="input" formControlName="headline" placeholder="Senior Frontend Developer" /></label>
+    <label class="field">Kurzprofil<textarea class="input min-h-24 resize-y" formControlName="professionalSummary" placeholder="Deine Erfahrung, Schwerpunkte und Stärken …"></textarea></label>
+    <label class="field">Skills<textarea class="input min-h-20 resize-y" formControlName="skills" placeholder="Kommagetrennt"></textarea></label>
+    <label class="field">Berufserfahrung<textarea class="input min-h-36 resize-y" formControlName="experience" placeholder="Pro Zeile eine Station oder ein wichtiger Erfolg"></textarea></label>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="field">Ausbildung<textarea class="input min-h-24 resize-y" formControlName="education"></textarea></label>
+      <label class="field">Sprachen<textarea class="input min-h-24 resize-y" formControlName="languages"></textarea></label>
+    </div>
+    <div class="rounded-xl border border-brand/20 bg-brand-soft/30 p-4">
+      <p class="m-0 mb-3 text-sm font-semibold">Optional auf eine Stelle zuschneiden</p>
+      <label class="field">Zielrolle<input class="input" formControlName="targetRole" placeholder="Product Engineer" /></label>
+      <label class="field mt-3">Stellenanzeige<textarea class="input min-h-28 resize-y" formControlName="jobDescription"></textarea></label>
+    </div>
+    <button class="btn-primary w-full" type="submit" [disabled]="loading()">
+      <span class="material-icons-round text-[18px]">{{ loading() ? 'hourglass_top' : 'auto_awesome' }}</span>
+      {{ loading() ? 'Entwurf wird erstellt …' : 'Lebenslauf erstellen' }}
+    </button>
+  </form>
+
+  <section aria-live="polite">
+    @if (result(); as resume) {
+      <div class="no-print mb-3 flex flex-wrap items-center justify-between gap-2">
+        <span class="text-xs text-muted">{{ sourceLabel(resume.generatedBy) }}</span>
+        <div class="flex gap-2"><button class="btn-ghost" (click)="downloadHtml()"><span class="material-icons-round text-[17px]">download</span>HTML</button><button class="btn-primary" (click)="print()"><span class="material-icons-round text-[17px]">picture_as_pdf</span>Drucken / PDF</button></div>
+      </div>
+      <article class="resume-paper rounded-xl bg-white p-8 text-slate-800 shadow-panel md:p-12">
+        <header class="border-b-2 border-violet-500 pb-6"><h2 class="m-0 text-4xl font-black tracking-tight">{{ resume.fullName }}</h2><p class="mb-0 mt-2 text-xl font-semibold text-violet-700">{{ resume.headline }}</p><p class="mb-0 mt-2 text-sm text-slate-500">{{ resume.contactLine }}</p></header>
+        <section class="resume-section"><h3>Profil</h3><p>{{ resume.professionalSummary }}</p></section>
+        @if (resume.coreSkills.length) { <section class="resume-section"><h3>Kompetenzen</h3><div class="flex flex-wrap gap-2">@for (skill of resume.coreSkills; track skill) { <span class="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">{{ skill }}</span> }</div></section> }
+        @if (resume.experience.length) { <section class="resume-section"><h3>Berufserfahrung</h3>@for (item of resume.experience; track $index) { <div class="mb-5"><div class="flex flex-wrap justify-between gap-2"><strong>{{ item.role }} @if (item.company) { · {{ item.company }} }</strong><span class="text-sm text-slate-500">{{ item.period }}</span></div><ul class="mt-2 pl-5">@for (bullet of item.bullets; track bullet) { <li>{{ bullet }}</li> }</ul></div> }</section> }
+        @if (resume.education.length) { <section class="resume-section"><h3>Ausbildung</h3><ul>@for (item of resume.education; track item) { <li>{{ item }}</li> }</ul></section> }
+        @if (resume.languages.length) { <section class="resume-section"><h3>Sprachen</h3><p>{{ resume.languages.join(' · ') }}</p></section> }
+      </article>
+    } @else {
+      <div class="empty min-h-[620px] px-8"><span class="material-icons-round text-5xl text-brand">description</span><div><h2 class="m-0 text-lg font-semibold text-text-hi">Dein Lebenslauf erscheint hier</h2><p class="m-0 mt-2 max-w-md text-sm">Gib nur echte Fakten ein. Jobbed strukturiert und formuliert sie, ohne Stationen zu erfinden.</p></div></div>
+    }
+  </section>
+</div>

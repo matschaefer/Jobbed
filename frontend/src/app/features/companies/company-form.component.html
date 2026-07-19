@@ -1,0 +1,58 @@
+<header class="page-head">
+  <div>
+    <h1>{{ isEdit() ? 'Unternehmen bearbeiten' : 'Neues Unternehmen' }}</h1>
+  </div>
+</header>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="card-surface form">
+  <section class="form__grid">
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required />
+      @if (form.controls.name.invalid && form.controls.name.touched) {
+        <mat-error>Der Name darf nicht leer sein.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Branche</mat-label>
+      <input matInput formControlName="industry" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Unternehmensgröße</mat-label>
+      <input matInput formControlName="companySize" placeholder="z. B. 51–200" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Standort</mat-label>
+      <input matInput formControlName="location" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Website</mat-label>
+      <input matInput formControlName="website" type="url" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Logo-URL</mat-label>
+      <input matInput formControlName="logoUrl" type="url" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput formControlName="description" rows="4"></textarea>
+    </mat-form-field>
+  </section>
+
+  <div class="form__actions">
+    <a mat-stroked-button routerLink="/app/companies">Abbrechen</a>
+    <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+      {{ isEdit() ? 'Speichern' : 'Anlegen' }}
+    </button>
+  </div>
+</form>

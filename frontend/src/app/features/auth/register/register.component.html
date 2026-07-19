@@ -1,0 +1,105 @@
+<app-auth-shell title="Konto erstellen" subtitle="Starte kostenlos mit Jobbed.">
+  @if (registered()) {
+    <div class="auth-success">
+      <mat-icon aria-hidden="true">mark_email_read</mat-icon>
+      <h2>Fast geschafft!</h2>
+      <p>
+        Wir haben dir eine E-Mail zur Bestätigung deiner Adresse gesendet. Bitte prüfe dein
+        Postfach und deinen Spam-Ordner.
+      </p>
+      @if (mailpitUrl) {
+        <p class="auth-local-hint">
+          Lokale Entwicklung: Die Nachricht wird von Mailpit aufgefangen.
+          <a [href]="mailpitUrl" target="_blank" rel="noopener">Mailpit öffnen</a>
+        </p>
+      }
+      <a mat-flat-button color="primary" routerLink="/login">Zur Anmeldung</a>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <p class="auth-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <mat-form-field appearance="outline">
+        <mat-label>Vorname</mat-label>
+        <input matInput formControlName="firstName" autocomplete="given-name" required />
+        @if (form.controls.firstName.hasError('required') && form.controls.firstName.touched) {
+          <mat-error>Vorname ist erforderlich.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nachname</mat-label>
+        <input matInput formControlName="lastName" autocomplete="family-name" required />
+        @if (form.controls.lastName.hasError('required') && form.controls.lastName.touched) {
+          <mat-error>Nachname ist erforderlich.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>E-Mail</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="email" required />
+        @if (form.controls.email.hasError('required') && form.controls.email.touched) {
+          <mat-error>E-Mail-Adresse ist erforderlich.</mat-error>
+        }
+        @if (form.controls.email.hasError('email')) {
+          <mat-error>Bitte eine gültige E-Mail-Adresse angeben.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="auth-password-field">
+        <mat-label>Passwort</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+          required
+        />
+        <mat-hint>Mind. 10 Zeichen, Groß-/Kleinbuchstabe, Ziffer und Sonderzeichen.</mat-hint>
+        @if (form.controls.password.hasError('required') && form.controls.password.touched) {
+          <mat-error>Passwort ist erforderlich.</mat-error>
+        }
+        @if (form.controls.password.hasError('pattern')) {
+          <mat-error>Das Passwort erfüllt die Anforderungen nicht.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Passwort bestätigen</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="confirmPassword"
+          autocomplete="new-password"
+          required
+        />
+        @if (form.controls.confirmPassword.hasError('required') && form.controls.confirmPassword.touched) {
+          <mat-error>Bitte bestätige dein Passwort.</mat-error>
+        }
+      </mat-form-field>
+      @if (form.hasError('passwordMismatch') && form.controls.confirmPassword.touched) {
+        <p class="auth-field-error" role="alert">Die Passwörter stimmen nicht überein.</p>
+      }
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        class="auth-submit"
+        [disabled]="submitting()"
+      >
+        @if (submitting()) {
+          <mat-progress-spinner diameter="20" mode="indeterminate" />
+        } @else {
+          Registrieren
+        }
+      </button>
+
+      <p class="auth-foot">
+        Bereits registriert? <a routerLink="/login" class="auth-link">Anmelden</a>
+      </p>
+    </form>
+  }
+</app-auth-shell>

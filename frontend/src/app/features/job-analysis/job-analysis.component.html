@@ -1,0 +1,64 @@
+<header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Intelligenter Profil-Check</p>
+    <h1 class="m-0 text-2xl font-bold tracking-tight md:text-3xl">Stellenanzeige analysieren</h1>
+    <p class="m-0 mt-1 text-sm text-muted">Anforderungen erkennen, Profil abgleichen und Bewerbung gezielt vorbereiten.</p>
+  </div>
+  <button type="button" class="btn-ghost" (click)="useSample()"><span class="material-icons-round text-[18px]">auto_awesome</span>Beispiel einsetzen</button>
+</header>
+
+<div class="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+  <form class="card-surface h-fit" [formGroup]="form" (ngSubmit)="analyze()">
+    <label class="mb-5 grid gap-2 text-sm font-semibold">
+      Deine Skills
+      <textarea formControlName="profileSkills" rows="3" class="input resize-y" placeholder="Java, Angular, Docker …"></textarea>
+      <span class="text-xs font-normal text-muted">Mit Kommas, Semikolons oder Zeilenumbrüchen trennen.</span>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Stellenbeschreibung
+      <textarea formControlName="jobDescription" rows="16" class="input resize-y leading-relaxed" placeholder="Füge hier den vollständigen Text der Stellenanzeige ein …"></textarea>
+      @if (form.controls.jobDescription.touched && form.controls.jobDescription.invalid) { <span class="text-xs font-normal text-rose-400">Bitte mindestens 30 Zeichen eingeben.</span> }
+    </label>
+    <button class="btn-primary mt-5 w-full" type="submit" [disabled]="loading()"><span class="material-icons-round text-[18px]">{{ loading() ? 'hourglass_top' : 'manage_search' }}</span>{{ loading() ? 'Analyse läuft …' : 'Jetzt analysieren' }}</button>
+    <p class="mb-0 mt-3 text-center text-xs text-muted">
+      @if (aiStatus().available) { KI aktiv · {{ aiStatus().model }} }
+      @else { Regelbasierter Modus · KI wird erst mit deinem serverseitigen API-Key aktiviert }
+    </p>
+  </form>
+
+  <section aria-live="polite">
+    @if (result(); as analysis) {
+      <div class="mb-4 grid gap-3 sm:grid-cols-3">
+        <div class="card-surface !p-5"><p class="m-0 text-xs uppercase tracking-wider text-muted">Profil-Match</p><strong class="mt-2 block text-4xl font-bold" [class]="matchTone()">{{ analysis.matchPercentage }}%</strong><p class="mb-0 mt-2 text-xs text-muted">{{ analysis.matchedSkills.length }} von {{ analysis.detectedSkills.length }} Anforderungen</p></div>
+        <div class="card-surface !p-5"><p class="m-0 text-xs uppercase tracking-wider text-muted">Seniorität</p><strong class="mt-3 block text-lg">{{ seniorityLabel(analysis.seniorityLevel) }}</strong></div>
+        <div class="card-surface !p-5"><p class="m-0 text-xs uppercase tracking-wider text-muted">Arbeitsmodell</p><strong class="mt-3 block text-lg">{{ workModelLabel(analysis.workModel) }}</strong></div>
+      </div>
+      <p class="mb-4 rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs text-muted">{{ analysisSource(analysis.analyzer) }}</p>
+
+      <div class="space-y-4">
+        <article class="card-surface">
+          <h2 class="m-0 text-base font-semibold">Skill-Abgleich</h2>
+          <div class="mt-4 grid gap-5 md:grid-cols-2">
+            <div><p class="m-0 mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">Passt zu deinem Profil</p><div class="flex flex-wrap gap-2">@for (skill of analysis.matchedSkills; track skill) { <span class="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs text-emerald-300">{{ skill }}</span> } @empty { <span class="text-sm text-muted">Noch keine Übereinstimmung</span> }</div></div>
+            <div><p class="m-0 mb-2 text-xs font-semibold uppercase tracking-wider text-rose-400">Fehlt im Profil</p><div class="flex flex-wrap gap-2">@for (skill of analysis.missingSkills; track skill) { <span class="rounded-full bg-rose-400/10 px-2.5 py-1 text-xs text-rose-300">{{ skill }}</span> } @empty { <span class="text-sm text-muted">Keine Lücken erkannt</span> }</div></div>
+          </div>
+        </article>
+
+        <article class="card-surface">
+          <h2 class="m-0 text-base font-semibold">Erkannte Anforderungen</h2>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div><p class="m-0 mb-2 text-xs text-muted">Programmiersprachen</p><div class="flex flex-wrap gap-2">@for (item of analysis.programmingLanguages; track item) { <span class="chip">{{ item }}</span> } @empty { <span class="text-sm text-muted">Keine erkannt</span> }</div></div>
+            <div><p class="m-0 mb-2 text-xs text-muted">Frameworks & Tools</p><div class="flex flex-wrap gap-2">@for (item of analysis.frameworksAndTools; track item) { <span class="chip">{{ item }}</span> } @empty { <span class="text-sm text-muted">Keine erkannt</span> }</div></div>
+            <div><p class="m-0 mb-2 text-xs text-muted">Sprachen</p><div class="flex flex-wrap gap-2">@for (item of analysis.spokenLanguages; track item) { <span class="chip">{{ item }}</span> } @empty { <span class="text-sm text-muted">Keine erkannt</span> }</div></div>
+            <div><p class="m-0 mb-2 text-xs text-muted">Gehalt</p><div class="flex flex-wrap gap-2">@for (item of analysis.salaryHints; track item) { <span class="chip">{{ item }}</span> } @empty { <span class="text-sm text-muted">Keine Angabe erkannt</span> }</div></div>
+          </div>
+        </article>
+
+        <article class="card-surface"><h2 class="m-0 text-base font-semibold">Benefits</h2><div class="mt-3 flex flex-wrap gap-2">@for (item of analysis.benefits; track item) { <span class="rounded-full bg-brand-soft px-2.5 py-1 text-xs text-brand">{{ item }}</span> } @empty { <span class="text-sm text-muted">Keine bekannten Benefits erkannt.</span> }</div></article>
+        <article class="card-surface border-brand/30 bg-brand-soft/30"><h2 class="m-0 text-base font-semibold">Empfehlungen</h2><ul class="mb-0 mt-3 space-y-2 pl-5 text-sm text-text-hi">@for (suggestion of analysis.suggestions; track suggestion) { <li>{{ suggestion }}</li> }</ul></article>
+      </div>
+    } @else {
+      <div class="empty min-h-[520px] px-8"><span class="material-icons-round text-5xl text-brand">query_stats</span><div><h2 class="m-0 text-lg font-semibold text-text-hi">Bereit für den Abgleich</h2><p class="m-0 mt-2 max-w-md text-sm">Nach der Analyse siehst du passende Skills, Lücken, Seniorität, Arbeitsmodell, Benefits und konkrete Vorschläge.</p></div></div>
+    }
+  </section>
+</div>

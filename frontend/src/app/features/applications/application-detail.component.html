@@ -1,0 +1,54 @@
+@if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+
+@if (detail(); as a) {
+  <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div class="min-w-0">
+      <a routerLink="/app/applications" class="mb-2 inline-flex items-center gap-1 text-sm text-muted hover:text-brand"><span class="material-icons-round text-[17px]">arrow_back</span>Bewerbungen</a>
+      <div class="flex flex-wrap items-center gap-3"><h1 class="m-0 text-2xl font-bold tracking-tight md:text-3xl">{{ a.jobTitle }}</h1><app-status-badge [status]="a.currentStatus" /></div>
+      <p class="m-0 mt-1 text-sm text-muted">{{ a.company.name }}@if (a.location) { · {{ a.location }} }</p>
+    </div>
+    <div class="flex gap-2"><a class="btn-ghost" [routerLink]="['/app/applications', a.id, 'edit']"><span class="material-icons-round text-[18px]">edit</span>Bearbeiten</a><button class="btn-ghost !border-red-500/30 !text-red-400 hover:!bg-red-500/10" (click)="remove()"><span class="material-icons-round text-[18px]">delete</span>Löschen</button></div>
+  </header>
+
+  <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,2fr)_360px]">
+    <main class="space-y-5">
+      <section class="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface p-4">
+        <div class="mr-auto"><p class="m-0 text-sm font-semibold">Status aktualisieren</p><p class="m-0 mt-0.5 text-xs text-muted">Jede Änderung erscheint in der Timeline.</p></div>
+        <select class="input !w-auto min-w-52" [formControl]="statusControl" aria-label="Status">@for (opt of statusOptions; track opt.value) { <option [value]="opt.value">{{ opt.label }}</option> }</select>
+        <button class="btn-primary" (click)="applyStatus()">Übernehmen</button>
+      </section>
+
+      <section class="rounded-2xl border border-border bg-surface p-5">
+        <h2 class="m-0 mb-4 text-base font-semibold">Bewerbungsdetails</h2>
+        <dl class="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div><dt class="text-xs text-muted">Priorität</dt><dd class="m-0 mt-1 text-sm">{{ priorityLabel(a.priority) || '–' }}</dd></div>
+          <div><dt class="text-xs text-muted">Arbeitsmodell</dt><dd class="m-0 mt-1 text-sm">{{ workModelLabel(a.workModel) || '–' }}</dd></div>
+          <div><dt class="text-xs text-muted">Bewerbungsdatum</dt><dd class="m-0 mt-1 text-sm">{{ a.applicationDate ? (a.applicationDate | date:'dd.MM.yyyy') : '–' }}</dd></div>
+          <div><dt class="text-xs text-muted">Frist</dt><dd class="m-0 mt-1 text-sm">{{ a.deadline ? (a.deadline | date:'dd.MM.yyyy') : '–' }}</dd></div>
+          <div><dt class="text-xs text-muted">Nächste Aktion</dt><dd class="m-0 mt-1 text-sm">{{ a.nextActionDate ? (a.nextActionDate | date:'dd.MM.yyyy') : '–' }}</dd></div>
+          <div><dt class="text-xs text-muted">Gehalt</dt><dd class="m-0 mt-1 text-sm">@if (a.salaryMin || a.salaryMax) { {{ a.salaryMin || '?' }}–{{ a.salaryMax || '?' }} {{ a.currency }} } @else { – }</dd></div>
+          <div><dt class="text-xs text-muted">Quelle</dt><dd class="m-0 mt-1 text-sm">{{ a.source || '–' }}</dd></div>
+          <div><dt class="text-xs text-muted">Ansprechpartner</dt><dd class="m-0 mt-1 text-sm">{{ a.contactPerson ? a.contactPerson.firstName + ' ' + a.contactPerson.lastName : '–' }}</dd></div>
+          @if (a.jobUrl) { <div class="sm:col-span-2 lg:col-span-3"><dt class="text-xs text-muted">Stellenanzeige</dt><dd class="m-0 mt-1 truncate text-sm"><a [href]="a.jobUrl" target="_blank" rel="noopener" class="text-brand hover:underline">{{ a.jobUrl }}</a></dd></div> }
+        </dl>
+        @if (a.tags.length) { <div class="mt-5 flex flex-wrap gap-2">@for (tag of a.tags; track tag.id) { <span class="chip">{{ tag.name }}</span> }</div> }
+      </section>
+
+      <app-document-panel [applicationId]="a.id" (changed)="reloadActivities()" />
+
+      @if (a.jobDescription || a.notes || a.rejectionReason) {
+        <section class="rounded-2xl border border-border bg-surface p-5 space-y-5">
+          @if (a.jobDescription) { <div><h2 class="m-0 mb-2 text-base font-semibold">Stellenbeschreibung</h2><p class="m-0 whitespace-pre-wrap text-sm leading-6 text-muted">{{ a.jobDescription }}</p></div> }
+          @if (a.notes) { <div><h2 class="m-0 mb-2 text-base font-semibold">Notizen</h2><p class="m-0 whitespace-pre-wrap text-sm leading-6 text-muted">{{ a.notes }}</p></div> }
+          @if (a.rejectionReason) { <div><h2 class="m-0 mb-2 text-base font-semibold">Absagegrund</h2><p class="m-0 whitespace-pre-wrap text-sm leading-6 text-muted">{{ a.rejectionReason }}</p></div> }
+        </section>
+      }
+    </main>
+
+    <aside class="sticky top-24 rounded-2xl border border-border bg-surface p-5">
+      <div class="mb-4 flex items-center justify-between"><h2 class="m-0 text-base font-semibold">Aktivitäten</h2><span class="chip">{{ activities().length }}</span></div>
+      @if (activities().length === 0) { <p class="py-6 text-center text-sm text-muted">Noch keine Aktivitäten.</p> }
+      @else { <ol class="m-0 list-none space-y-0 p-0">@for (act of activities(); track act.id) { <li class="relative border-l border-border pb-5 pl-5 last:pb-0"><span class="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-brand ring-4 ring-surface"></span><strong class="block text-sm">{{ act.title }}</strong><time class="mt-1 block text-xs text-muted">{{ act.activityDate | date:'dd.MM.yyyy, HH:mm' }}</time>@if (act.description) { <p class="m-0 mt-1.5 text-xs leading-5 text-muted">{{ act.description }}</p> }</li> }</ol> }
+    </aside>
+  </div>
+}

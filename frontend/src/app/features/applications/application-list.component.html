@@ -1,0 +1,23 @@
+<header class="page-head"><div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Übersicht</p><h1>Bewerbungen</h1><p class="muted">Alle Bewerbungen, Fristen und Prioritäten auf einen Blick.</p></div><a class="btn-primary" routerLink="/app/applications/new"><span class="material-icons-round text-[18px]">add</span>Neue Bewerbung</a></header>
+
+<div class="mb-5 flex flex-wrap gap-3 rounded-xl border border-border bg-surface p-3">
+  <div class="relative min-w-64 flex-1"><span class="material-icons-round pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-muted">search</span><input class="input !pl-9" [formControl]="search" placeholder="Titel, Unternehmen oder Notizen …" /></div>
+  <select class="input !w-auto min-w-52" [formControl]="statusFilter" aria-label="Status filtern"><option value="">Alle Status</option>@for (opt of statusOptions; track opt.value) { <option [value]="opt.value">{{ opt.label }}</option> }</select>
+</div>
+@if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+@if (page(); as p) {
+  @if (p.content.length === 0) { <div class="empty"><span class="material-icons-round text-4xl text-brand">work_off</span><div><p class="m-0 font-medium text-text-hi">Keine Bewerbungen gefunden</p><p class="m-0 mt-1 text-sm">Passe die Filter an oder lege deine erste Bewerbung an.</p></div><a class="btn-ghost" routerLink="/app/applications/new">Bewerbung anlegen</a></div> }
+  @else {
+    <div class="overflow-hidden rounded-2xl border border-border bg-surface">
+      @for (a of p.content; track a.id) {
+        <a [routerLink]="['/app/applications', a.id]" class="grid gap-3 border-b border-border p-4 transition last:border-0 hover:bg-surface-2/60 md:grid-cols-[minmax(0,2fr)_160px_130px_110px] md:items-center">
+          <div class="flex min-w-0 items-center gap-3"><app-company-avatar [name]="a.company.name" [size]="42" /><div class="min-w-0"><strong class="block truncate text-sm">{{ a.jobTitle }}</strong><span class="mt-0.5 block truncate text-xs text-muted">{{ a.company.name }}@if (a.location) { · {{ a.location }} }</span></div></div>
+          <app-status-badge [status]="a.currentStatus" />
+          <span class="text-sm"><span class="md:hidden text-muted">Priorität: </span>{{ priorityLabel(a.priority) }}</span>
+          <span class="text-xs text-muted">{{ a.applicationDate ? (a.applicationDate | date:'dd.MM.yyyy') : 'Kein Datum' }}</span>
+        </a>
+      }
+    </div>
+    <mat-paginator class="mt-3 !bg-transparent" [length]="p.totalElements" [pageSize]="p.size" [pageIndex]="p.page" [pageSizeOptions]="[10,20,50]" (page)="onPage($event)" />
+  }
+}

@@ -1,0 +1,3 @@
+.calendar-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.calendar-day { min-height: 118px; }
+@media (max-width: 900px) { .calendar-day { min-height: 88px; } }

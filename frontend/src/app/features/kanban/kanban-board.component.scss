@@ -1,0 +1,26 @@
+// Nur Drag & Drop-Feedback; Layout kommt aus Tailwind-Utilities.
+.cdk-drag-preview {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  border-radius: 12px;
+  cursor: grabbing;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// Drop-Zone hebt sich beim Ziehen leicht hervor
+.cdk-drop-list-receiving,
+.cdk-drop-list-dragging {
+  border-radius: 12px;
+  outline: 1px dashed rgba(139, 124, 246, 0.5);
+  outline-offset: 2px;
+}

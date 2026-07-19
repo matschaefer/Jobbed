@@ -1,0 +1,32 @@
+<section class="rounded-2xl border border-border bg-surface p-5">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div><h2 class="m-0 text-base font-semibold">Dokumente</h2><p class="m-0 mt-1 text-xs text-muted">PDF, PNG, JPEG, DOC oder DOCX · maximal 10 MB</p></div>
+    <span class="chip">{{ documents().length }} Dateien</span>
+  </div>
+
+  <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px]">
+    <label class="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed p-4 text-center transition" [class.border-brand]="dragActive()" [class.bg-brand-soft]="dragActive()" [class.border-border-light]="!dragActive()" (dragover)="dragOver($event)" (dragleave)="dragLeave($event)" (drop)="drop($event)">
+      <input class="sr-only" type="file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" (change)="choose($event)" />
+      <span class="material-icons-round mb-2 text-3xl text-brand">cloud_upload</span>
+      @if (selected(); as file) { <strong class="max-w-full truncate text-sm">{{ file.name }}</strong><span class="mt-1 text-xs text-muted">{{ size(file.size) }}</span> }
+      @else { <strong class="text-sm">Datei ablegen oder auswählen</strong><span class="mt-1 text-xs text-muted">Der Inhalt wird serverseitig geprüft</span> }
+    </label>
+    <div class="space-y-2">
+      <select class="input" [formControl]="type" aria-label="Dokumenttyp">@for (item of types; track item.value) { <option [value]="item.value">{{ item.label }}</option> }</select>
+      <input class="input" [formControl]="description" placeholder="Beschreibung (optional)" />
+      <button class="btn-primary w-full" [disabled]="!selected() || uploading()" (click)="upload()">@if (uploading()) { {{ progress() }} % } @else { Hochladen }</button>
+      @if (selected()) { <button class="w-full text-xs text-muted hover:text-text-hi" (click)="clear()">Auswahl entfernen</button> }
+    </div>
+  </div>
+
+  <div class="mt-5 divide-y divide-border">
+    @for (item of documents(); track item.id) {
+      <div class="flex items-center gap-3 py-3">
+        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand"><span class="material-icons-round">description</span></span>
+        <div class="min-w-0 flex-1"><p class="m-0 truncate text-sm font-medium">{{ item.originalFileName }}</p><p class="m-0 mt-0.5 text-xs text-muted">{{ typeLabel(item.documentType) }} · {{ size(item.fileSize) }} · {{ item.createdAt | date:'dd.MM.yyyy, HH:mm' }}</p></div>
+        <button class="grid h-9 w-9 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-brand" aria-label="Herunterladen" (click)="download(item)"><span class="material-icons-round text-[19px]">download</span></button>
+        <button class="grid h-9 w-9 place-items-center rounded-lg text-muted hover:bg-red-500/10 hover:text-red-400" aria-label="Löschen" (click)="remove(item)"><span class="material-icons-round text-[19px]">delete</span></button>
+      </div>
+    } @empty { @if (!loading()) { <p class="m-0 py-5 text-center text-sm text-muted">Noch keine Dokumente hinterlegt.</p> } }
+  </div>
+</section>

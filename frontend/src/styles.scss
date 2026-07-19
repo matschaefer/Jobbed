@@ -1,0 +1,188 @@
+// ============================================================================
+// Globales Theme – Tailwind + Angular Material (dunkel, grüner Akzent)
+// ============================================================================
+@use '@angular/material' as mat;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  @include mat.core();
+}
+
+$jobbed-dark: mat.define-theme(
+  (
+    color: (
+      theme-type: dark,
+      primary: mat.$violet-palette,
+      tertiary: mat.$azure-palette,
+    ),
+    density: (
+      scale: -1,
+    ),
+  )
+);
+
+html {
+  @include mat.all-component-themes($jobbed-dark);
+  color-scheme: dark;
+
+  // Design-Tokens (spiegeln tailwind.config.js) – von Bestandskomponenten genutzt
+  --jt-primary: #8b7cf6;
+  --jt-surface: #0a0b0f;
+  --jt-surface-elevated: #14161c;
+  --jt-surface-2: #1b1e26;
+  --jt-text: #eef0f4;
+  --jt-text-muted: #8b909c;
+  --jt-border: #282c36;
+
+  // Material an das dunkle Design angleichen
+  --mat-sys-primary: #8b7cf6;
+  --mdc-filled-button-container-color: #8b7cf6;
+  --mdc-protected-button-label-text-color: #ffffff;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--jt-surface);
+  color: var(--jt-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+// Grüne Primary-Buttons (Material flat) klar akzentuieren
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary {
+  --mdc-filled-button-label-text-color: #ffffff;
+  font-weight: 600;
+}
+
+// Barrierefreiheit: sichtbarer Fokusindikator
+:focus-visible {
+  outline: 2px solid var(--jt-primary);
+  outline-offset: 2px;
+}
+
+// Angular Material teilt den Outline-Rahmen am Label in mehrere Segmente.
+// Die rechte Kante des Label-Segments wird sonst als senkrechter Strich im
+// Eingabefeld sichtbar (u. a. Registrierung und Bewerbungsformular).
+.mat-mdc-form-field .mdc-notched-outline__notch {
+  border-right-style: none !important;
+}
+
+input,
+textarea {
+  caret-color: var(--jt-primary);
+}
+
+// Moderne, dezente Scrollbars
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333844 transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2b303b;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #3a4150;
+  background-clip: padding-box;
+}
+
+// Wiederverwendbare Komponenten-Klassen
+@layer components {
+  .card-surface {
+    @apply rounded-xl border border-border bg-surface p-6;
+  }
+
+  .btn-primary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover;
+  }
+  .btn-ghost {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border-light bg-transparent px-4 py-2 text-sm font-medium text-text-hi transition-colors hover:bg-surface-2;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text-hi placeholder:text-muted focus:border-brand focus:outline-none;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-surface-3 px-2.5 py-0.5 text-xs text-text-hi;
+  }
+}
+
+// Toast-Varianten (Snackbar)
+.jt-snack-success .mdc-snackbar__surface {
+  background-color: #16a34a !important;
+}
+.jt-snack-error .mdc-snackbar__surface {
+  background-color: #dc2626 !important;
+}
+.jt-snack-info .mdc-snackbar__surface {
+  background-color: #2563eb !important;
+}
+.jt-snack-success,
+.jt-snack-error,
+.jt-snack-info {
+  --mdc-snackbar-supporting-text-color: #ffffff;
+}
+
+// Gemeinsame Layout-Bausteine für ältere und neue Feature-Seiten.
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0;
+    color: var(--jt-text);
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -0.025em;
+  }
+
+  p { margin: 0.3rem 0 0; }
+}
+
+.muted { color: var(--jt-text-muted); }
+.link { color: var(--jt-primary); text-decoration: none; }
+.link:hover { color: #a99df9; }
+.empty {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  border: 1px dashed var(--jt-border);
+  border-radius: 14px;
+  background: var(--jt-surface-elevated);
+  color: var(--jt-text-muted);
+  text-align: center;
+}
+.empty mat-icon { width: 40px; height: 40px; font-size: 40px; color: var(--jt-primary); }
+.row-actions { white-space: nowrap; text-align: right; }
+
+@media (max-width: 640px) {
+  .page-head { align-items: stretch; flex-direction: column; }
+  .page-head > a, .page-head > button { align-self: flex-start; }
+}
+
+@media print {
+  app-shell > div > header,
+  app-shell > div > nav { display: none !important; }
+  app-shell > div > main { max-width: none !important; padding: 0 !important; }
+}

@@ -1,0 +1,87 @@
+<header class="page-head">
+  <div>
+    <h1>{{ isEdit() ? 'Kontakt bearbeiten' : 'Neuer Kontakt' }}</h1>
+  </div>
+</header>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="card-surface form">
+  <section class="form__grid">
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Unternehmen</mat-label>
+      <input
+        matInput
+        [formControl]="companySearch"
+        [matAutocomplete]="companyAuto"
+        placeholder="Unternehmen suchen …"
+        required
+      />
+      <mat-autocomplete
+        #companyAuto="matAutocomplete"
+        [displayWith]="displayCompany"
+        (optionSelected)="onCompanySelected($event)"
+      >
+        @for (company of companyOptions(); track company.id) {
+          <mat-option [value]="company">{{ company.name }}</mat-option>
+        }
+      </mat-autocomplete>
+      @if (form.controls.companyId.invalid && form.controls.companyId.touched) {
+        <mat-error>Bitte ein Unternehmen wählen.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Vorname</mat-label>
+      <input matInput formControlName="firstName" required />
+      @if (form.controls.firstName.invalid && form.controls.firstName.touched) {
+        <mat-error>Vorname ist erforderlich.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nachname</mat-label>
+      <input matInput formControlName="lastName" required />
+      @if (form.controls.lastName.invalid && form.controls.lastName.touched) {
+        <mat-error>Nachname ist erforderlich.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Position</mat-label>
+      <input matInput formControlName="position" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>E-Mail</mat-label>
+      <input matInput type="email" formControlName="email" />
+      @if (form.controls.email.hasError('email')) {
+        <mat-error>Bitte eine gültige E-Mail-Adresse angeben.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Telefon</mat-label>
+      <input matInput formControlName="phone" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>LinkedIn-URL</mat-label>
+      <input matInput formControlName="linkedInUrl" type="url" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Notizen</mat-label>
+      <textarea matInput formControlName="notes" rows="3"></textarea>
+    </mat-form-field>
+  </section>
+
+  <div class="form__actions">
+    <a mat-stroked-button routerLink="/app/contacts">Abbrechen</a>
+    <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+      {{ isEdit() ? 'Speichern' : 'Anlegen' }}
+    </button>
+  </div>
+</form>
