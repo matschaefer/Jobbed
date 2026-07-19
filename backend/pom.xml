@@ -23,7 +23,7 @@
         <springdoc.version>2.7.0</springdoc.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.version>1.18.36</lombok.version>
-        <jjwt.version>0.12.6</jjwt.version>
+        <jjwt.version>0.13.0</jjwt.version>
         <!-- 1.21.4 behebt die Kompatibilität mit aktuellen Docker-Engine-APIs. -->
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
