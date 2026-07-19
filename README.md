@@ -1,188 +1,299 @@
 # Jobbed
 
-> Bewerbungs-Tracker für Jobsuchende – Bewerbungen verwalten, per Kanban
-> organisieren, Interviews & Erinnerungen planen, Dokumente ablegen und den
-> gesamten Bewerbungsprozess auswerten.
+A fullstack job application tracker built with Angular and Spring Boot.
 
-**Portfolio-Projekt** mit Angular (Standalone, Signals), Spring Boot (Java 21),
-PostgreSQL, Docker und CI/CD.
+[Live Demo](DEPLOYMENT_URL) · [Source Code](https://github.com/matschaefer/Jobbed)
 
-![Status](https://img.shields.io/badge/status-release%20candidate-violet)
-![License](https://img.shields.io/badge/license-MIT-blue)
+## Overview
 
-## Inhaltsverzeichnis
+Jobbed helps job seekers keep applications, companies, contacts, documents,
+interviews and reminders in one place. The goal is to replace scattered notes
+and spreadsheets with a focused web application for the job search process.
 
-- [Funktionsübersicht](#funktionsübersicht)
-- [Technologie-Stack](#technologie-stack)
-- [Architektur](#architektur)
-- [Voraussetzungen](#voraussetzungen)
-- [Schnellstart mit Docker](#schnellstart-mit-docker)
-- [Lokale Entwicklung](#lokale-entwicklung)
-- [Konfiguration](#konfiguration)
-- [Tests](#tests)
-- [API-Dokumentation](#api-dokumentation)
-- [Sicherheitskonzept](#sicherheitskonzept)
-- [Ordnerstruktur](#ordnerstruktur)
-- [Bekannte Einschränkungen](#bekannte-einschränkungen)
-- [Deployment](#deployment)
-- [Lizenz](#lizenz)
+This repository is a fullstack portfolio project. It combines an Angular and
+TypeScript frontend with a Java 21 Spring Boot REST API, PostgreSQL persistence,
+Flyway database migrations, Docker-based local development and automated checks
+with GitHub Actions.
 
-## Funktionsübersicht
+## Live Demo
 
-- Bewerbungen erstellen, bearbeiten, filtern und durchsuchen
-- Kanban-Board mit Drag & Drop und Statusverlauf
-- Unternehmen und Ansprechpartner verwalten
-- Interviews & Erinnerungen inkl. E-Mail-Benachrichtigungen
-- Dokumenten-Upload (CV, Anschreiben, …) mit sicherem Download
-- Aktivitäten-Timeline pro Bewerbung
-- Statistiken & Dashboard
-- Stellenanzeigen-Analyse mit optionaler KI und zuverlässigem Regel-Fallback
-- KI-gestützter, ATS-freundlicher Lebenslauf-Generator mit HTML-/PDF-Ausgabe
-- Rollen USER / ADMIN mit strikter Mandantentrennung
+The deployed version includes a demo entry point with prepared sample data.
+No registration is required for trying the main application flow.
 
-## Technologie-Stack
+In demo mode, the backend uses a dedicated `DEMO` role. Read-only requests are
+allowed, while data-changing requests such as create, update, delete, file
+upload and AI requests are blocked for the demo user. Login, refresh and logout
+remain available so the demo session can work normally.
 
-| Bereich   | Technologien |
-|-----------|--------------|
-| Frontend  | Angular (Standalone, Signals), TypeScript, Angular Material, CDK Drag&Drop, RxJS, ng2-charts, SCSS, ESLint, Prettier |
-| Backend   | Java 21, Spring Boot, Spring Web, Spring Data JPA, Spring Security, Bean Validation, MapStruct, Lombok |
-| Daten     | PostgreSQL, Flyway |
-| Infra     | Docker, Docker Compose, GitHub Actions, Mailpit, optional MinIO |
-| Qualität  | JUnit 5, Mockito, Testcontainers, MockMvc, Jasmine/Karma, Playwright |
-| Betrieb   | Actuator, OpenAPI/Swagger, strukturierte Logs, Correlation-ID |
+- Live demo: [DEPLOYMENT_URL](DEPLOYMENT_URL)
+- Demo entry: use the **Demo live ansehen** button on the landing page or the
+  demo button on the login page.
 
-## Architektur
+## Main Features
 
-Detaillierte Diagramme in [docs/architecture.md](docs/architecture.md).
+- Create, edit, search and filter job applications
+- Kanban board with drag-and-drop status changes
+- Company and contact management
+- Interview and reminder scheduling
+- Document upload and download for application files
+- Activity timeline for status changes and notes
+- Dashboard with application statistics
+- Job description analysis with a rule-based fallback
+- Resume builder with HTML / print-to-PDF output
+- User login with protected application data
+
+## Screenshots
+
+Screenshots are not committed yet to avoid broken image links. The repository
+contains a screenshot guide in [docs/images/README.md](docs/images/README.md).
+
+Planned screenshots:
+
+- Dashboard
+- Kanban board
+- Application details
+- Job analysis
+- Resume builder
+
+## Technology Stack
+
+### Frontend
+
+- Angular
+- TypeScript
+- Angular Material
+- Angular CDK Drag and Drop
+- RxJS
+- SCSS
+- Tailwind CSS
+- Chart.js / ng2-charts
+
+### Backend
+
+- Java 21
+- Spring Boot
+- Spring Web
+- Spring Data JPA
+- Spring Security
+- Spring Validation
+- REST API
+- MapStruct
+- Lombok
+
+### Database and Infrastructure
+
+- PostgreSQL
+- Flyway
+- Docker
+- Docker Compose
+- Nginx for the frontend container
+- Caddy in the production Docker setup
+- Mailpit for local email testing
+- GitHub Actions
+
+### Testing
+
+- JUnit 5
+- Mockito
+- Spring Boot Test
+- Spring Security Test
+- Testcontainers
+- MockMvc
+- Jasmine / Karma
+- Playwright
+
+## How It Works
+
+The Angular frontend renders the user interface and communicates with the
+Spring Boot backend through REST endpoints. The backend contains the application
+logic, checks authentication and authorization, and reads or writes data through
+Spring Data JPA. PostgreSQL stores the application data. Flyway manages
+versioned database changes.
 
 ```text
-Angular SPA  ──REST /api/v1──►  Spring Boot API  ──JDBC──►  PostgreSQL
-                                      │
-                                      ├── SMTP (Mailpit)
-                                      ├── Datei-Speicher (lokal / MinIO)
-                                      └── KI-API (optional, nur serverseitiger Key)
+Angular Frontend
+        |
+        | REST API
+        v
+Spring Boot Backend
+        |
+        v
+PostgreSQL Database
 ```
 
-## Voraussetzungen
+The backend follows a simple layered structure:
 
-- **Für Docker-Start:** Docker + Docker Compose.
-- **Für lokale Entwicklung:** Java 21, Node 20+, npm 10+. Maven ist optional –
-  das Backend bringt den Maven-Wrapper (`./mvnw`) mit.
+```text
+Controller -> Service -> Repository -> Database
+```
 
-## Schnellstart mit Docker
+Controllers expose REST endpoints, services contain the application logic,
+repositories access the database, and DTOs are used for API requests and
+responses.
+
+## Selected Technical Implementations
+
+### Kanban Board
+
+Applications can be grouped by status and moved on a Kanban board. The frontend
+uses Angular CDK Drag and Drop. A status change is sent to the backend through a
+REST request and the backend stores the new status and an activity entry.
+
+### Authentication
+
+Spring Security and JWT are used to protect the API and associate stored data
+with the authenticated user. The frontend attaches the access token to protected
+requests and redirects unauthenticated users to the login page.
+
+### Demo Mode
+
+The demo account is created from configured demo data. A backend filter blocks
+non-read requests for users with the `DEMO` role, except the auth endpoints
+needed for login, refresh and logout. The frontend also shows feedback when a
+demo user tries to perform a blocked action.
+
+### Database Migrations
+
+Flyway stores database changes as versioned migration files. This keeps the
+database schema reproducible for local development, tests and deployment.
+
+### Automated Tests
+
+The backend contains unit and integration tests, including Spring Boot tests,
+MockMvc tests and Testcontainers-based database tests. The frontend contains
+unit tests for Angular services, guards, interceptors and UI logic. Playwright is
+used for end-to-end scenarios.
+
+### Continuous Integration
+
+GitHub Actions runs checks on pushes to `main` and on pull requests:
+
+- backend verification with Maven
+- frontend dependency audit
+- frontend linting
+- frontend unit tests
+- frontend production build
+- Docker image build with Docker Compose
+- Playwright end-to-end tests against the Docker Compose stack
+
+## Local Setup
+
+### Prerequisites
+
+- Docker and Docker Compose
+- For manual development without Docker: Java 21, Node.js 20+ and npm
+
+### Start with Docker
 
 ```bash
-cp .env.example .env      # Werte anpassen (mind. Passwörter/Secret)
+cp .env.example .env
 docker compose up --build
 ```
 
-| Dienst        | URL |
-|---------------|-----|
-| Frontend      | http://localhost |
-| Backend API   | http://localhost:8080/api/v1 |
-| Swagger UI    | http://localhost:8080/swagger-ui.html |
-| Health        | http://localhost:8080/actuator/health |
-| Mailpit (Mail)| http://localhost:8025 |
+Local URLs:
 
-Im `dev`-Profil werden bei einer leeren Datenbank idempotent Demo-Daten angelegt:
+| Service | URL |
+| --- | --- |
+| Frontend | http://localhost |
+| Backend API | http://localhost:8080/api/v1 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| Health | http://localhost:8080/actuator/health |
+| Mailpit | http://localhost:8025 |
 
-- E-Mail: `analytics@jobbed.local`
-- Passwort: `Str0ng!Passw0rd`
-- 8 Bewerbungen in unterschiedlichen Status sowie 3 Unternehmen
+The local Docker setup enables demo data by default. A seeded user is available:
 
-Mit `DEMO_DATA_ENABLED=false` lässt sich das Seed-Verhalten abschalten.
+```text
+Email: analytics@jobbed.local
+Password: Str0ng!Passw0rd
+```
 
-## Lokale Entwicklung
+### Run Frontend and Backend Separately
 
-**Backend:**
+Backend:
 
 ```bash
 cd backend
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-**Frontend:**
+Frontend:
 
 ```bash
 cd frontend
 npm install
-npm start        # http://localhost:4200 (Proxy /api -> :8080)
+npm start
 ```
 
-## Konfiguration
-
-Alle Umgebungsvariablen sind in [.env.example](.env.example) dokumentiert.
-Spring-Profile: `dev`, `test`, `prod`. Angular-Environments unter
-`frontend/src/environments/`.
-
-### Optionale KI aktivieren
-
-Ohne API-Key bleibt Jobbed vollständig nutzbar: Die Stellenanalyse verwendet
-Regeln und der Lebenslauf-Generator eine professionelle Vorlage. Für echte
-KI-Ausgaben werden ausschließlich im Backend folgende Werte gesetzt:
-
-```env
-AI_PROVIDER=openai
-AI_API_KEY=sk-...
-AI_MODEL=gpt-5-mini
-```
-
-Danach den Backend-Container neu bauen: `docker compose up -d --build backend`.
-Der Schlüssel wird niemals an das Frontend ausgeliefert. Stellenanzeigen und
-Lebenslaufdaten werden nur bei aktivierter KI an den konfigurierten Dienst gesendet.
+The Angular development server runs on `http://localhost:4200` and proxies
+`/api` requests to the backend.
 
 ## Tests
 
+Backend:
+
 ```bash
-# Backend
-cd backend && ./mvnw test
+cd backend
+./mvnw verify
+```
 
-# Frontend
-cd frontend && npm run lint && npm run test:ci && npm run build
+Frontend:
 
-# Gesamter Container-Build
+```bash
+cd frontend
+npm run lint
+npm run test:ci
+npm run build
+```
+
+End-to-end tests:
+
+```bash
+cd frontend
+npm run e2e
+```
+
+Docker build:
+
+```bash
 docker compose build
 ```
 
-## API-Dokumentation
-
-OpenAPI/Swagger UI: `http://localhost:8080/swagger-ui.html`.
-Der Entwurf ist in [docs/api-design.md](docs/api-design.md) beschrieben.
-
-## Deployment
-
-Die produktive Docker-Konfiguration mit automatischem HTTPS ist in
-[docs/deployment.md](docs/deployment.md) beschrieben. Für echte Registrierungs-
-und Reset-Mails muss ein Produktions-SMTP-Anbieter konfiguriert werden; Mailpit
-ist ausschließlich für die lokale Entwicklung vorgesehen.
-
-## Sicherheitskonzept
-
-Vollständig in [docs/security.md](docs/security.md): kurzlebige JWT-Access-Tokens,
-rotierende Refresh-Tokens in HttpOnly-Cookies, BCrypt, Rate-Limiting, strikte
-Mandantentrennung, sichere Header/CORS, OWASP-Top-10-Abgleich.
-
-## Ordnerstruktur
+## Project Structure
 
 ```text
-jobbed/
-├── frontend/            # Angular SPA
-├── backend/             # Spring Boot API
-├── docker/              # Zusätzliche Container-Assets (optional)
-├── docs/                # Architektur, Datenmodell, API, Security, Plan, Risiken
-├── .github/workflows/   # CI/CD (GitHub Actions)
-├── docker-compose.yml
-├── .env.example
-├── README.md
+.
+├── backend/              # Spring Boot REST API
+├── frontend/             # Angular application
+├── docs/                 # Architecture, deployment and project notes
+├── deploy/               # Caddy configuration for Docker deployment
+├── .github/workflows/    # GitHub Actions workflow
+├── docker-compose.yml    # Local Docker stack
+├── compose.prod.yml      # Production Docker stack
+├── vercel.json           # Vercel frontend deployment settings
 └── LICENSE
 ```
 
-## Bekannte Einschränkungen
+## What I Learned
 
-- Erstversion nutzt PostgreSQL-Suche statt Elasticsearch.
-- Datei-Speicher lokal; S3/MinIO als Adapter vorbereitet.
-- Echte KI-Ausgaben benötigen einen eigenen API-Key; ohne Key arbeitet Jobbed im klar gekennzeichneten Fallback-Modus.
+- Connecting an Angular frontend to a Spring Boot REST API
+- Building user-specific application data with Spring Security
+- Modeling relational data with PostgreSQL and Spring Data JPA
+- Managing database changes with Flyway migrations
+- Writing backend, frontend and end-to-end tests
+- Containerizing a fullstack application with Docker
+- Preparing a deployed portfolio application with GitHub Actions checks
 
-## Lizenz
+## Current Limitations
 
-[MIT](LICENSE)
+- The public demo is read-only, so visitors cannot permanently change demo data.
+- External AI features require backend configuration and are blocked for demo
+  users.
+- The application is currently focused on individual job seekers, not team
+  collaboration.
+- Production email delivery requires an SMTP provider. Mailpit is only used for
+  local development.
+- Uploaded documents are stored outside the Git repository.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

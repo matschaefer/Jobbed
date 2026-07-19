@@ -1,96 +1,115 @@
 # Deployment
 
-Jobbed kann als einzelner Docker-Stack auf einem Linux-Server betrieben werden.
-Die Produktionskonfiguration enthält PostgreSQL, Backend, Frontend und Caddy als
-HTTPS-Reverse-Proxy. Mailpit gehört ausschließlich zur lokalen Entwicklung.
+Status: Deployed portfolio project  
+Last updated: July 2026
 
-## Voraussetzungen
+Jobbed can be deployed either as separate services or as a Docker-based stack.
+The repository contains configuration for both local Docker usage and a
+production Docker Compose setup.
 
-- Linux-Server mit Docker Engine und Docker Compose
-- Domain mit einem A/AAAA-Record auf den Server
-- Freigegebene Ports 80 und 443
-- SMTP-Zugang mit verifiziertem Absender
-- Regelmäßige externe Backups für Datenbank und Uploads
+## Current Portfolio Deployment
 
-## Erstes Deployment
+The repository contains Vercel configuration for the Angular frontend and an API
+rewrite to a Render backend:
 
-```bash
-git clone <repository-url> jobbed
-cd jobbed
-cp .env.production.example .env.production
+- `vercel.json`
+- `frontend/vercel.json`
+
+The public frontend URL is not stored in the repository. Use `DEPLOYMENT_URL` in
+documentation until the final URL is added to the GitHub repository metadata.
+
+## Docker Production Setup
+
+The production Docker setup is defined in:
+
+```text
+compose.prod.yml
+deploy/Caddyfile
 ```
 
-In `.env.production` müssen mindestens Domain, Datenbankpasswort, JWT-Secret und
-SMTP-Zugangsdaten ersetzt werden. `MAIL_FROM` muss bei deinem Mailanbieter als
-Absender verifiziert sein. Sichere Werte lassen sich beispielsweise so
-erzeugen:
+It contains:
 
-```bash
-openssl rand -base64 48
+- PostgreSQL
+- Spring Boot backend
+- Angular frontend container
+- Caddy reverse proxy
+
+The example environment file is:
+
+```text
+.env.production.example
 ```
 
-Danach wird der Stack gestartet:
+At minimum, production deployment requires:
+
+- domain name for the Docker/Caddy setup
+- PostgreSQL password
+- JWT secret
+- SMTP settings for real emails
+
+## Local Docker Setup
+
+For local development:
 
 ```bash
-docker compose --env-file .env.production -f compose.prod.yml up -d --build
-docker compose --env-file .env.production -f compose.prod.yml ps
+cp .env.example .env
+docker compose up --build
 ```
 
-Caddy beantragt das TLS-Zertifikat automatisch. Die Anwendung ist anschließend
-unter `https://<DOMAIN>` erreichbar. Der Bestätigungslink in Registrierungs-E-Mails
-verwendet dieselbe Domain.
+Local services:
 
-## Recruiter-Demo
+| Service | URL |
+| --- | --- |
+| Frontend | http://localhost |
+| Backend API | http://localhost:8080/api/v1 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| Health | http://localhost:8080/actuator/health |
+| Mailpit | http://localhost:8025 |
 
-Fuer einen oeffentlichen Portfolio-Link ist der Demo-Modus standardmaessig aktiv:
+## Demo Mode
+
+The public demo mode is controlled through environment variables:
 
 ```env
 DEMO_MODE_ENABLED=true
 DEMO_MODE_EMAIL=demo@jobbed.local
 ```
 
-Auf der Landingpage und Login-Seite gibt es dadurch einen Demo-Einstieg ohne
-Passwort. Der Demo-Nutzer sieht gefuellte Bewerbungsdaten, kann aber serverseitig
-keine POST/PUT/PATCH/DELETE-Aktionen ausfuehren. Uploads, Datenaenderungen und
-kostenpflichtige KI-Aufrufe bleiben damit fuer Besucher gesperrt.
+When enabled, the backend creates a demo user if it does not already exist.
+Users with the `DEMO` role can read sample data, but data-changing requests are
+blocked by `DemoModeWriteProtectionFilter`.
 
-Wenn die Instanz nur privat genutzt werden soll:
+Allowed demo write requests are limited to:
 
-```env
-DEMO_MODE_ENABLED=false
-```
+- demo login
+- token refresh
+- logout
 
-## Aktualisierung
+## Email
+
+Mailpit is used only for local development. A deployed version needs an SMTP
+provider for registration, verification and password reset emails.
+
+If no real SMTP provider is configured, the application can still be shown
+through the read-only demo mode, but real registration emails will not be
+delivered.
+
+## Updating a Docker Deployment
 
 ```bash
 git pull --ff-only
 docker compose --env-file .env.production -f compose.prod.yml up -d --build
 ```
 
-Flyway führt neue Datenbankmigrationen beim Backend-Start aus. Vor jedem Update
-sollte trotzdem ein Datenbank-Backup erstellt werden.
+Flyway runs pending database migrations when the backend starts.
 
-## Backups
+## Simple Release Checklist
 
-```bash
-docker compose --env-file .env.production -f compose.prod.yml exec -T postgres \
-  pg_dump -U jobbed -d jobbed -Fc > jobbed-$(date +%F).dump
-```
-
-Zusätzlich muss das Volume `backend-uploads` gesichert werden. Backups sollten
-verschlüsselt auf ein externes Ziel übertragen und regelmäßig testweise
-wiederhergestellt werden.
-
-## Release-Checkliste
-
-- DNS und HTTPS funktionieren
-- Registrierung liefert eine echte Bestätigungs-E-Mail
-- SMTP-Absenderdomain ist verifiziert; SPF, DKIM und DMARC sind eingerichtet
-- Bestätigungslink und Passwort-Reset verwenden die Produktionsdomain
-- `SPRING_PROFILES_ACTIVE=prod` und `DEMO_DATA_ENABLED=false`
-- Demo-Modus funktioniert: Demo-Login kann lesen, aber keine Bewerbung anlegen
-- Keine Beispiel-Secrets oder `.env.production` im Repository
-- `npm audit --omit=dev --audit-level=high` meldet keine Production-Vulnerabilities
-- Datenbank- und Upload-Backups eingerichtet
-- Datenschutzerklärung und Impressum mit echten Angaben vorhanden
-- Monitoring für `/actuator/health` eingerichtet
+- Frontend URL opens
+- Backend health endpoint responds
+- Vercel API rewrite points to the deployed backend
+- `SPRING_PROFILES_ACTIVE=prod` is set for the backend
+- database connection uses a valid JDBC URL
+- `JWT_SECRET` is set
+- demo mode works for read-only exploration
+- no real `.env` file is committed
