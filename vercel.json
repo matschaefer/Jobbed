@@ -1,0 +1,15 @@
+{
+  "installCommand": "cd frontend && npm ci",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist/jobbed/browser",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://jobbed-api.onrender.com/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
