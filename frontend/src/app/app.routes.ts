@@ -108,6 +108,12 @@ export const routes: Routes = [
         title: 'Lebenslauf erstellen – Jobbed',
       },
       {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/settings/settings.component').then((m) => m.SettingsComponent),
+        title: 'Einstellungen - Jobbed',
+      },
+      {
         path: 'applications/new',
         loadComponent: () =>
           import('./features/applications/application-form.component').then(

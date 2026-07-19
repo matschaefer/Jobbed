@@ -38,12 +38,26 @@
       color="primary"
       type="submit"
       class="auth-submit"
-      [disabled]="submitting()"
+      [disabled]="submitting() || demoSubmitting()"
     >
       @if (submitting()) {
         <mat-progress-spinner diameter="20" mode="indeterminate" />
       } @else {
         Anmelden
+      }
+    </button>
+
+    <button
+      mat-stroked-button
+      type="button"
+      class="auth-submit mt-3"
+      [disabled]="submitting() || demoSubmitting()"
+      (click)="demoLogin()"
+    >
+      @if (demoSubmitting()) {
+        <mat-progress-spinner diameter="20" mode="indeterminate" />
+      } @else {
+        Demo ansehen
       }
     </button>
 

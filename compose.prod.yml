@@ -28,6 +28,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DEMO_DATA_ENABLED: "false"
+      DEMO_MODE_ENABLED: ${DEMO_MODE_ENABLED:-true}
+      DEMO_MODE_EMAIL: ${DEMO_MODE_EMAIL:-demo@jobbed.local}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobbed
       SPRING_DATASOURCE_USERNAME: jobbed
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}

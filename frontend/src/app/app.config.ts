@@ -8,6 +8,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { demoModeInterceptor } from './core/interceptors/demo-mode.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { AuthService } from './core/auth/auth.service';
 
@@ -28,7 +29,7 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }),
     ),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, demoModeInterceptor, errorInterceptor])),
     provideAnimationsAsync(),
     provideNativeDateAdapter(),
     provideCharts(withDefaultRegisterables()),

@@ -36,6 +36,7 @@ export class ShellComponent {
     { path: '/app/applications', label: 'Bewerbungen' },
     { path: '/app/companies', label: 'Unternehmen' },
     { path: '/app/contacts', label: 'Kontakte' },
+    { path: '/app/settings', label: 'Einstellungen' },
   ];
 
   protected readonly initials = computed(() => {

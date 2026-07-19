@@ -7,6 +7,7 @@ import com.jobbed.auth.token.UserTokenRepository;
 import com.jobbed.common.error.exception.EmailNotVerifiedException;
 import com.jobbed.common.error.exception.InvalidCredentialsException;
 import com.jobbed.common.error.exception.ResourceConflictException;
+import com.jobbed.config.DemoModeProperties;
 import com.jobbed.security.AuthProperties;
 import com.jobbed.security.JwtService;
 import com.jobbed.user.Role;
@@ -58,7 +59,7 @@ class AuthServiceTest {
     void setUp() {
         authService = new AuthService(userRepository, userProfileRepository, userTokenRepository,
                 passwordEncoder, jwtService, refreshTokenService, emailService, rateLimiter,
-                userMapper, props);
+                userMapper, props, new DemoModeProperties(false, "demo@jobbed.local"));
     }
 
     private User verifiedUser(String email) {

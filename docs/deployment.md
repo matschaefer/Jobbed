@@ -40,6 +40,26 @@ Caddy beantragt das TLS-Zertifikat automatisch. Die Anwendung ist anschließend
 unter `https://<DOMAIN>` erreichbar. Der Bestätigungslink in Registrierungs-E-Mails
 verwendet dieselbe Domain.
 
+## Recruiter-Demo
+
+Fuer einen oeffentlichen Portfolio-Link ist der Demo-Modus standardmaessig aktiv:
+
+```env
+DEMO_MODE_ENABLED=true
+DEMO_MODE_EMAIL=demo@jobbed.local
+```
+
+Auf der Landingpage und Login-Seite gibt es dadurch einen Demo-Einstieg ohne
+Passwort. Der Demo-Nutzer sieht gefuellte Bewerbungsdaten, kann aber serverseitig
+keine POST/PUT/PATCH/DELETE-Aktionen ausfuehren. Uploads, Datenaenderungen und
+kostenpflichtige KI-Aufrufe bleiben damit fuer Besucher gesperrt.
+
+Wenn die Instanz nur privat genutzt werden soll:
+
+```env
+DEMO_MODE_ENABLED=false
+```
+
 ## Aktualisierung
 
 ```bash
@@ -68,7 +88,9 @@ wiederhergestellt werden.
 - SMTP-Absenderdomain ist verifiziert; SPF, DKIM und DMARC sind eingerichtet
 - Bestätigungslink und Passwort-Reset verwenden die Produktionsdomain
 - `SPRING_PROFILES_ACTIVE=prod` und `DEMO_DATA_ENABLED=false`
+- Demo-Modus funktioniert: Demo-Login kann lesen, aber keine Bewerbung anlegen
 - Keine Beispiel-Secrets oder `.env.production` im Repository
+- `npm audit --omit=dev --audit-level=high` meldet keine Production-Vulnerabilities
 - Datenbank- und Upload-Backups eingerichtet
 - Datenschutzerklärung und Impressum mit echten Angaben vorhanden
 - Monitoring für `/actuator/health` eingerichtet

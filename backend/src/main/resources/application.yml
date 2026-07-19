@@ -56,6 +56,11 @@ server:
 
 # App-spezifische Eigenschaften
 app:
+  demo-data:
+    enabled: ${DEMO_DATA_ENABLED:false}
+  demo-mode:
+    enabled: ${DEMO_MODE_ENABLED:false}
+    email: ${DEMO_MODE_EMAIL:demo@jobbed.local}
   ai:
     provider: ${AI_PROVIDER:disabled}
     base-url: ${AI_BASE_URL:https://api.openai.com/v1}

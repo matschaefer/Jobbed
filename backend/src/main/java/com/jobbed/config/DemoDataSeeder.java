@@ -14,8 +14,7 @@ import com.jobbed.user.UserProfileRepository;
 import com.jobbed.user.UserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +23,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-@Profile("dev")
-@ConditionalOnProperty(name = "app.demo-data.enabled", havingValue = "true")
 public class DemoDataSeeder implements ApplicationRunner {
     public static final String EMAIL = "analytics@jobbed.local";
     public static final String PASSWORD = "Str0ng!Passw0rd";
@@ -36,22 +33,32 @@ public class DemoDataSeeder implements ApplicationRunner {
     private final CompanyRepository companies;
     private final JobApplicationRepository applications;
     private final PasswordEncoder passwordEncoder;
+    private final DemoModeProperties demoMode;
+    private final boolean demoDataEnabled;
 
     public DemoDataSeeder(UserRepository users, UserProfileRepository profiles, CompanyRepository companies,
-            JobApplicationRepository applications, PasswordEncoder passwordEncoder) {
+            JobApplicationRepository applications, PasswordEncoder passwordEncoder,
+            DemoModeProperties demoMode,
+            @Value("${app.demo-data.enabled:false}") boolean demoDataEnabled) {
         this.users = users; this.profiles = profiles; this.companies = companies;
         this.applications = applications; this.passwordEncoder = passwordEncoder;
+        this.demoMode = demoMode; this.demoDataEnabled = demoDataEnabled;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (!users.existsByEmail(EMAIL)) seedMainDemo();
-        if (!users.existsByEmail(SECURITY_EMAIL)) seedSecurityDemo();
+        if (demoDataEnabled) {
+            if (!users.existsByEmail(EMAIL)) seedMainDemo(EMAIL, Role.USER);
+            if (!users.existsByEmail(SECURITY_EMAIL)) seedSecurityDemo();
+        }
+        if (demoMode.enabled() && !users.existsByEmail(demoMode.email())) {
+            seedMainDemo(demoMode.email(), Role.DEMO);
+        }
     }
 
-    private void seedMainDemo() {
-        User user = createUser("Ana", "Lytics", EMAIL);
+    private void seedMainDemo(String email, Role role) {
+        User user = createUser("Jobbed", "Demo", email, role);
 
         Company acme = company(user, "Acme", "Berlin", "Software");
         Company techCorp = company(user, "TechCorp", "Hamburg", "Technologie");
@@ -69,15 +76,15 @@ public class DemoDataSeeder implements ApplicationRunner {
     }
 
     private void seedSecurityDemo() {
-        User user = createUser("E2E", "Security", SECURITY_EMAIL);
+        User user = createUser("E2E", "Security", SECURITY_EMAIL, Role.USER);
         Company company = company(user, "Private Test Company", "Köln", "Security Test");
         companies.save(company);
         create(user, company, "Private Test Application", ApplicationStatus.SAVED, Priority.LOW, 1);
     }
 
-    private User createUser(String firstName, String lastName, String email) {
+    private User createUser(String firstName, String lastName, String email, Role role) {
         User user = new User(); user.setFirstName(firstName); user.setLastName(lastName); user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.encode(PASSWORD)); user.setRole(Role.USER); user.setEnabled(true); user.setEmailVerified(true);
+        user.setPasswordHash(passwordEncoder.encode(PASSWORD)); user.setRole(role); user.setEnabled(true); user.setEmailVerified(true);
         users.save(user); profiles.save(new UserProfile(user)); return user;
     }
 

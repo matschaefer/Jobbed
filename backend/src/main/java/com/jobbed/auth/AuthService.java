@@ -16,9 +16,11 @@ import com.jobbed.common.error.exception.ResourceConflictException;
 import com.jobbed.common.error.exception.ResourceNotFoundException;
 import com.jobbed.common.error.exception.SessionExpiredException;
 import com.jobbed.common.util.TokenHasher;
+import com.jobbed.config.DemoModeProperties;
 import com.jobbed.security.AuthProperties;
 import com.jobbed.security.AuthenticatedUser;
 import com.jobbed.security.JwtService;
+import com.jobbed.user.Role;
 import com.jobbed.user.User;
 import com.jobbed.user.UserMapper;
 import com.jobbed.user.UserProfile;
@@ -55,6 +57,7 @@ public class AuthService {
     private final LoginRateLimiter rateLimiter;
     private final UserMapper userMapper;
     private final AuthProperties authProperties;
+    private final DemoModeProperties demoModeProperties;
 
     public AuthService(UserRepository userRepository,
                        UserProfileRepository userProfileRepository,
@@ -65,7 +68,8 @@ public class AuthService {
                        EmailService emailService,
                        LoginRateLimiter rateLimiter,
                        UserMapper userMapper,
-                       AuthProperties authProperties) {
+                       AuthProperties authProperties,
+                       DemoModeProperties demoModeProperties) {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.userTokenRepository = userTokenRepository;
@@ -76,6 +80,7 @@ public class AuthService {
         this.rateLimiter = rateLimiter;
         this.userMapper = userMapper;
         this.authProperties = authProperties;
+        this.demoModeProperties = demoModeProperties;
     }
 
     @Transactional
@@ -121,6 +126,19 @@ public class AuthService {
         }
 
         rateLimiter.recordSuccess(rateKey);
+        user.setLastLoginAt(Instant.now());
+        return issueTokens(user, userAgent, ipAddress);
+    }
+
+    @Transactional
+    public AuthResult demoLogin(String userAgent, String ipAddress) {
+        if (!demoModeProperties.enabled()) {
+            throw new ForbiddenException("Der Demo-Modus ist nicht aktiviert.");
+        }
+        User user = userRepository.findByEmail(normalizeEmail(demoModeProperties.email()))
+                .filter(User::isEnabled)
+                .filter(candidate -> candidate.getRole() == Role.DEMO)
+                .orElseThrow(() -> new ResourceNotFoundException("Demo-Nutzer wurde nicht gefunden."));
         user.setLastLoginAt(Instant.now());
         return issueTokens(user, userAgent, ipAddress);
     }

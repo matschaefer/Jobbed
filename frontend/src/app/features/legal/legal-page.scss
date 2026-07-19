@@ -9,13 +9,10 @@ main { width: min(880px,calc(100% - 40px)); margin: 0 auto; padding: 100px 0 120
 .legal-kicker { display: inline-flex; margin: 0; border: 1px solid rgba(139,124,246,.3); border-radius: 999px; background: rgba(139,124,246,.1); padding: 6px 10px; color: #b7adff; font-size: 9px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
 h1 { margin: 22px 0 0; font-size: clamp(3rem,8vw,6.2rem); line-height: .95; letter-spacing: -.065em; }
 .legal-lead { max-width: 620px; margin: 24px 0 0; color: rgba(255,255,255,.45); font-size: 15px; line-height: 1.7; }
-.legal-required { margin-top: 48px; border: 1px solid rgba(251,191,36,.28); border-radius: 14px; background: rgba(251,191,36,.07); padding: 20px; }
-.legal-required strong { color: #f8d46d; font-size: 12px; }
-.legal-required p { margin: 7px 0 0; color: rgba(255,255,255,.48); font-size: 11px; line-height: 1.65; }
 section { margin-top: 46px; border-top: 1px solid rgba(255,255,255,.08); padding-top: 30px; }
 h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
 section p { margin: 13px 0 0; color: rgba(255,255,255,.48); font-size: 12px; line-height: 1.85; }
-.legal-placeholder { border-radius: 4px; background: rgba(251,191,36,.1); padding: 1px 4px; color: #f8d46d; }
+section a { color: #b7adff; }
 footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,.08); padding: 28px clamp(1.25rem,5vw,5rem); color: rgba(255,255,255,.3); font-size: 10px; }
 footer a { color: #a99fff; }
 @media (max-width: 600px) { .legal-back { font-size: 0; } main { padding-top: 70px; } }

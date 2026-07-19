@@ -28,6 +28,7 @@ export class LoginComponent {
   private readonly router = inject(Router);
 
   protected readonly submitting = signal(false);
+  protected readonly demoSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
@@ -53,6 +54,22 @@ export class LoginComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.submitting.set(false);
+        this.errorMessage.set(extractErrorMessage(error));
+      },
+    });
+  }
+
+  demoLogin(): void {
+    if (this.demoSubmitting()) {
+      return;
+    }
+    this.demoSubmitting.set(true);
+    this.errorMessage.set(null);
+
+    this.auth.demoLogin().subscribe({
+      next: () => void this.router.navigateByUrl('/app/dashboard'),
+      error: (error: HttpErrorResponse) => {
+        this.demoSubmitting.set(false);
         this.errorMessage.set(extractErrorMessage(error));
       },
     });

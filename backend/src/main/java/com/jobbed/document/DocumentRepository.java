@@ -9,4 +9,5 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
     Optional<Document> findByIdAndUserId(UUID id, UUID userId);
     List<Document> findByUserIdAndApplicationIdOrderByCreatedAtDesc(UUID userId, UUID applicationId);
     List<Document> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    void deleteByUserId(UUID userId);
 }

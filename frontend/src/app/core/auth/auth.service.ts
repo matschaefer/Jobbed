@@ -36,6 +36,12 @@ export class AuthService {
       .pipe(tap((res) => this.store.setSession(res)));
   }
 
+  demoLogin(): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.base}/demo`, {}, { withCredentials: true })
+      .pipe(tap((res) => this.store.setSession(res)));
+  }
+
   logout(): Observable<void> {
     return this.http.post<void>(`${this.base}/logout`, {}, { withCredentials: true }).pipe(
       catchError(() => of(void 0)),

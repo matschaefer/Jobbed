@@ -36,20 +36,23 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_AUTH_POST = {
             "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh",
-            "/api/v1/auth/logout", "/api/v1/auth/verify-email",
+            "/api/v1/auth/logout", "/api/v1/auth/demo", "/api/v1/auth/verify-email",
             "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password"
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final DemoModeWriteProtectionFilter demoModeWriteProtectionFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final CorsProperties corsProperties;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          DemoModeWriteProtectionFilter demoModeWriteProtectionFilter,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler,
                           CorsProperties corsProperties) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.demoModeWriteProtectionFilter = demoModeWriteProtectionFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.corsProperties = corsProperties;
@@ -69,7 +72,8 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(demoModeWriteProtectionFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 

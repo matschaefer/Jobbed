@@ -16,6 +16,7 @@ export class AuthStore {
   readonly status = this.statusSig.asReadonly();
   readonly isAuthenticated = computed(() => this.statusSig() === 'authenticated');
   readonly isAdmin = computed(() => this.userSig()?.role === 'ADMIN');
+  readonly isDemo = computed(() => this.userSig()?.role === 'DEMO');
   readonly displayName = computed(() => {
     const u = this.userSig();
     return u ? `${u.firstName} ${u.lastName}`.trim() : '';

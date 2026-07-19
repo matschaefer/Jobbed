@@ -19,4 +19,6 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
     Page<Company> findByUserIdAndNameContainingIgnoreCase(UUID userId, String name, Pageable pageable);
 
     List<Company> findTop20ByUserIdAndNameContainingIgnoreCaseOrderByName(UUID userId, String name);
+
+    void deleteByUserId(UUID userId);
 }

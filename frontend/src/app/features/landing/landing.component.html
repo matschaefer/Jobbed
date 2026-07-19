@@ -13,6 +13,7 @@
     </nav>
 
     <div class="flex items-center gap-2">
+      <button type="button" class="header-login hidden sm:inline-flex" (click)="demoLogin()">Demo</button>
       <a href="/login" class="header-login hidden sm:inline-flex">Anmelden</a>
       <a href="/register" class="header-register">Registrieren</a>
     </div>
@@ -29,8 +30,8 @@
         <h1>Eine Plattform.<br><span>Mehr Chancen.</span></h1>
         <p>Organisiere deinen gesamten Bewerbungsprozess und nutze KI, um Stellen zu analysieren, Skill-Matches zu erkennen und einen überzeugenden Lebenslauf zu erstellen.</p>
         <div class="hero-actions">
-          <a href="/register" class="primary-cta">Kostenlos starten <span class="material-icons-round">arrow_forward</span></a>
-          <a href="#ai" class="secondary-cta"><span class="play-icon"><span class="material-icons-round">auto_awesome</span></span> KI-Funktionen entdecken</a>
+          <button type="button" class="primary-cta" (click)="demoLogin()" [disabled]="demoSubmitting()">Demo live ansehen <span class="material-icons-round">arrow_forward</span></button>
+          <a href="/register" class="secondary-cta"><span class="play-icon"><span class="material-icons-round">person_add</span></span> Eigenes Konto erstellen</a>
         </div>
       </div>
 
@@ -97,7 +98,7 @@
           <small>KI-LEBENSLAUF</small>
           <h3>Ein Lebenslauf, der zu deiner Zielrolle passt.</h3>
           <p>Jobbed strukturiert deine echten Erfahrungen zu einem ATS-freundlichen Entwurf und richtet Zusammenfassung sowie Kompetenzen auf die gewünschte Position aus.</p>
-          <a href="/register">Lebenslauf erstellen <span class="material-icons-round">arrow_forward</span></a>
+          <button type="button" (click)="demoLogin()">Lebenslauf ansehen <span class="material-icons-round">arrow_forward</span></button>
         </article>
         <article class="ai-tool-card">
           <span class="ai-tool-icon"><span class="material-icons-round">psychology</span></span>
@@ -229,7 +230,7 @@
             <li><span class="material-icons-round">check</span>{{ point }}</li>
           }
         </ul>
-        <a href="/register" class="primary-cta">Jetzt ausprobieren <span class="material-icons-round">arrow_forward</span></a>
+        <button type="button" class="primary-cta" (click)="demoLogin()" [disabled]="demoSubmitting()">Jetzt ausprobieren <span class="material-icons-round">arrow_forward</span></button>
       </div>
     </section>
 
@@ -252,7 +253,7 @@
       <span class="section-kicker">Bereit für den nächsten Schritt?</span>
       <h2>Deine Jobsuche verdient<br><span>einen besseren Arbeitsplatz.</span></h2>
       <p>Starte kostenlos, bring Ordnung in deinen Prozess und behalte die Kontrolle über deine Daten.</p>
-      <div><a href="/register" class="primary-cta">Kostenlos starten <span class="material-icons-round">arrow_forward</span></a><a href="/login" class="secondary-cta">Anmelden</a></div>
+      <div><button type="button" class="primary-cta" (click)="demoLogin()" [disabled]="demoSubmitting()">Demo live ansehen <span class="material-icons-round">arrow_forward</span></button><a href="/register" class="secondary-cta">Registrieren</a></div>
     </section>
   </main>
 

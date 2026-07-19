@@ -59,6 +59,15 @@ public class AuthController {
         return ResponseEntity.ok(result.response());
     }
 
+    @PostMapping("/demo")
+    @Operation(summary = "Demo-Login", description = "Startet eine schreibgeschuetzte Demo-Sitzung.")
+    public ResponseEntity<AuthResponse> demo(HttpServletRequest httpRequest,
+                                             HttpServletResponse httpResponse) {
+        AuthResult result = authService.demoLogin(userAgent(httpRequest), clientIp(httpRequest));
+        setRefreshCookie(httpResponse, result.rawRefreshToken());
+        return ResponseEntity.ok(result.response());
+    }
+
     @PostMapping("/refresh")
     @Operation(summary = "Token erneuern", description = "Rotiert das Refresh-Token und liefert ein neues Access-Token.")
     public ResponseEntity<AuthResponse> refresh(HttpServletRequest httpRequest,

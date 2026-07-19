@@ -79,6 +79,10 @@
         <p class="m-0 font-semibold text-text-hi">{{ store.displayName() }}</p>
         <p class="m-0 text-xs text-muted">{{ store.user()?.email }}</p>
       </div>
+      <a mat-menu-item routerLink="/app/settings">
+        <span class="material-icons-round mr-2 align-middle text-[18px]">settings</span>
+        Einstellungen
+      </a>
       <button mat-menu-item (click)="logout()">
         <span class="material-icons-round mr-2 align-middle text-[18px]">logout</span>
         Abmelden
@@ -98,6 +102,19 @@
       </a>
     }
   </nav>
+
+  @if (store.isDemo()) {
+    <section class="border-b border-violet-400/20 bg-violet-500/10 px-4 py-3 text-sm text-violet-100 md:px-8">
+      <div class="mx-auto flex max-w-[1400px] items-center gap-3">
+        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-violet-400/20 text-violet-100">
+          <span class="material-icons-round text-[18px]">visibility</span>
+        </span>
+        <p class="m-0">
+          Demo-Modus aktiv. Du kannst Jobbed voll ansehen, aber Aenderungen, Uploads und KI-Aufrufe sind deaktiviert.
+        </p>
+      </div>
+    </section>
+  }
 
   <main class="mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8">
     <router-outlet />

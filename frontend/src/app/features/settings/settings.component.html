@@ -1,0 +1,74 @@
+<section class="space-y-6">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-brand">Konto</p>
+      <h1 class="m-0 text-2xl font-bold md:text-3xl">Einstellungen</h1>
+      <p class="mt-2 max-w-2xl text-sm text-muted">
+        Verwalte deine Sitzung und entferne dein Konto, wenn du Jobbed nicht mehr nutzen moechtest.
+      </p>
+    </div>
+  </header>
+
+  <article class="rounded-lg border border-border bg-surface p-5">
+    <h2 class="m-0 text-lg font-semibold">Profil</h2>
+    <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
+      <div>
+        <dt class="text-xs uppercase tracking-widest text-muted">Name</dt>
+        <dd class="mt-1 m-0 font-medium">{{ store.displayName() }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs uppercase tracking-widest text-muted">E-Mail</dt>
+        <dd class="mt-1 m-0 font-medium">{{ store.user()?.email }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs uppercase tracking-widest text-muted">Rolle</dt>
+        <dd class="mt-1 m-0 font-medium">{{ store.user()?.role }}</dd>
+      </div>
+    </dl>
+  </article>
+
+  <article class="rounded-lg border border-red-500/25 bg-red-500/5 p-5">
+    <div class="flex items-start gap-3">
+      <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-red-500/10 text-red-300">
+        <span class="material-icons-round text-[20px]">delete_forever</span>
+      </span>
+      <div>
+        <h2 class="m-0 text-lg font-semibold text-red-100">Konto dauerhaft loeschen</h2>
+        <p class="mt-2 max-w-2xl text-sm text-red-100/70">
+          Dadurch werden Konto, Bewerbungen, Unternehmen, Kontakte, Dokumente, Termine, Erinnerungen und Sitzungen entfernt.
+        </p>
+      </div>
+    </div>
+
+    @if (store.isDemo()) {
+      <p class="mt-5 rounded-lg border border-violet-400/20 bg-violet-500/10 px-4 py-3 text-sm text-violet-100">
+        Im Demo-Modus ist diese Aktion deaktiviert.
+      </p>
+    } @else {
+      <form class="mt-5 grid gap-4 md:max-w-xl" [formGroup]="form" (ngSubmit)="deleteAccount()" novalidate>
+        @if (errorMessage()) {
+          <p class="m-0 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100" role="alert">
+            {{ errorMessage() }}
+          </p>
+        }
+        <label class="grid gap-2 text-sm">
+          <span class="font-medium">Aktuelles Passwort</span>
+          <input class="input" type="password" formControlName="password" autocomplete="current-password" />
+        </label>
+        <label class="grid gap-2 text-sm">
+          <span class="font-medium">Bestaetigung</span>
+          <input class="input" type="text" formControlName="confirmText" placeholder="LOESCHEN" autocomplete="off" />
+          <small class="text-muted">Tippe LOESCHEN ein, um die Aktion freizugeben.</small>
+        </label>
+        <button
+          type="submit"
+          class="inline-flex w-fit items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-bold text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="submitting()"
+        >
+          <span class="material-icons-round text-[18px]">delete</span>
+          Konto loeschen
+        </button>
+      </form>
+    }
+  </article>
+</section>

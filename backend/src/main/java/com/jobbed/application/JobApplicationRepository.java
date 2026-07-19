@@ -34,6 +34,8 @@ public interface JobApplicationRepository
 
     long countByUserId(UUID userId);
 
+    void deleteByUserId(UUID userId);
+
     @EntityGraph(attributePaths = {"company"})
     List<JobApplication> findByDeadlineBetween(LocalDate from, LocalDate to);
 }
