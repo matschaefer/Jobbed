@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TimeoutError } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { extractErrorMessage } from '../../../core/interceptors/error.interceptor';
 import { AuthShellComponent } from '../auth-shell.component';
@@ -68,9 +69,13 @@ export class LoginComponent {
 
     this.auth.demoLogin().subscribe({
       next: () => void this.router.navigateByUrl('/app/dashboard'),
-      error: (error: HttpErrorResponse) => {
+      error: (error: unknown) => {
         this.demoSubmitting.set(false);
-        this.errorMessage.set(extractErrorMessage(error));
+        this.errorMessage.set(
+          error instanceof TimeoutError
+            ? 'Das kostenlose Backend wacht gerade auf. Bitte in ein paar Sekunden nochmal versuchen.'
+            : extractErrorMessage(error as HttpErrorResponse),
+        );
       },
     });
   }

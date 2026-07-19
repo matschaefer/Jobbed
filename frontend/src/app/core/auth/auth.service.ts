@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timeout } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
@@ -39,7 +39,10 @@ export class AuthService {
   demoLogin(): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.base}/demo`, {}, { withCredentials: true })
-      .pipe(tap((res) => this.store.setSession(res)));
+      .pipe(
+        timeout({ first: 25000 }),
+        tap((res) => this.store.setSession(res)),
+      );
   }
 
   logout(): Observable<void> {

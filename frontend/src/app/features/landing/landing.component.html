@@ -30,9 +30,15 @@
         <h1>Eine Plattform.<br><span>Mehr Chancen.</span></h1>
         <p>Organisiere deinen gesamten Bewerbungsprozess und nutze KI, um Stellen zu analysieren, Skill-Matches zu erkennen und einen überzeugenden Lebenslauf zu erstellen.</p>
         <div class="hero-actions">
-          <button type="button" class="primary-cta" (click)="demoLogin()" [disabled]="demoSubmitting()">Demo live ansehen <span class="material-icons-round">arrow_forward</span></button>
+          <button type="button" class="primary-cta" (click)="demoLogin()" [disabled]="demoSubmitting()">
+            {{ demoSubmitting() ? 'Demo wird gestartet …' : 'Demo live ansehen' }}
+            <span class="material-icons-round">{{ demoSubmitting() ? 'hourglass_top' : 'arrow_forward' }}</span>
+          </button>
           <a href="/register" class="secondary-cta"><span class="play-icon"><span class="material-icons-round">person_add</span></span> Eigenes Konto erstellen</a>
         </div>
+        @if (demoError()) {
+          <p class="hero-error" role="alert">{{ demoError() }}</p>
+        }
       </div>
 
       <div class="hero-product" aria-label="Vorschau des Jobbed Bewerbungsboards">

@@ -19,7 +19,7 @@ button.header-login:disabled, button.primary-cta:disabled { cursor: progress; op
 .header-register { background: #8b7cf6; color: #fff; }
 
 .hero-section { position: relative; min-height: 100vh; overflow: hidden; padding: 128px clamp(1.25rem,5vw,5rem) 0; background: #090a12; }
-.hero-grid, .final-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px); background-size: 74px 74px; mask-image: linear-gradient(to bottom,#000 45%,transparent 96%); }
+.hero-grid, .final-grid { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px); background-size: 74px 74px; mask-image: linear-gradient(to bottom,#000 45%,transparent 96%); }
 .hero-orb { position: absolute; border-radius: 50%; filter: blur(2px); pointer-events: none; }
 .hero-orb--one { width: 760px; height: 620px; left: 50%; top: -210px; transform: translateX(-50%); background: radial-gradient(circle,rgba(113,91,238,.3),transparent 68%); }
 .hero-orb--two { width: 420px; height: 420px; right: -180px; top: 340px; background: radial-gradient(circle,rgba(139,124,246,.13),transparent 70%); }
@@ -29,13 +29,14 @@ button.header-login:disabled, button.primary-cta:disabled { cursor: progress; op
 .hero-copy h1 { margin: 28px 0 0; font-size: clamp(3.2rem,7.5vw,7.6rem); font-weight: 950; line-height: .91; letter-spacing: -.07em; }
 .hero-copy h1 span, .section-intro h2 span, .workflow-copy h2 span, .ai-copy h2 span, .final-cta h2 span { color: transparent; background: linear-gradient(90deg,#bdb3ff,#806ff3 58%,#d5ceff); background-clip: text; -webkit-background-clip: text; }
 .hero-copy > p { max-width: 680px; margin: 28px auto 0; color: rgba(255,255,255,.52); font-size: 16px; line-height: 1.75; }
-.hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
+.hero-actions { position: relative; z-index: 7; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
 .primary-cta, .secondary-cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border-radius: 999px; padding: 14px 23px; font-size: 13px; font-weight: 900; transition: transform .2s ease, box-shadow .2s ease; }
 .primary-cta { background: #8b7cf6; color: #fff; box-shadow: 0 14px 35px rgba(107,88,225,.28); }
 .secondary-cta { border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.07); color: #fff; }
 .primary-cta:hover, .secondary-cta:hover { transform: translateY(-2px); }
 .play-icon { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: #fff; color: #11121a; }
 .play-icon .material-icons-round, .primary-cta .material-icons-round { font-size: 17px; }
+.hero-error { max-width: 560px; margin: 18px auto 0; border: 1px solid rgba(248,113,113,.3); border-radius: 14px; background: rgba(127,29,29,.22); padding: 12px 14px; color: #fecaca; font-size: 12px; font-weight: 700; line-height: 1.5; }
 
 .hero-product { position: relative; z-index: 4; width: min(1180px,94vw); margin: 56px auto 0; }
 .product-window { display: grid; min-height: 430px; grid-template-columns: 64px 1fr; overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 24px 24px 0 0; background: #11121b; box-shadow: 0 50px 120px rgba(0,0,0,.6); }

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TimeoutError } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { extractErrorMessage } from '../../core/interceptors/error.interceptor';
 
 interface Feature {
   readonly icon: string;
@@ -20,6 +22,7 @@ export class LandingComponent {
   private readonly router = inject(Router);
 
   protected readonly demoSubmitting = signal(false);
+  protected readonly demoError = signal<string | null>(null);
 
   protected readonly features: readonly Feature[] = [
     {
@@ -56,12 +59,20 @@ export class LandingComponent {
       return;
     }
     this.demoSubmitting.set(true);
+    this.demoError.set(null);
     this.auth.demoLogin().subscribe({
       next: () => void this.router.navigateByUrl('/app/dashboard'),
-      error: () => {
+      error: (error: unknown) => {
         this.demoSubmitting.set(false);
-        void this.router.navigateByUrl('/login');
+        this.demoError.set(this.demoErrorMessage(error));
       },
     });
+  }
+
+  private demoErrorMessage(error: unknown): string {
+    if (error instanceof TimeoutError) {
+      return 'Das kostenlose Backend wacht gerade auf. Bitte in ein paar Sekunden nochmal klicken.';
+    }
+    return extractErrorMessage(error as never);
   }
 }
